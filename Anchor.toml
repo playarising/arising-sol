@@ -12,7 +12,7 @@ arising = "8eRLNRfCsDbAgXuFSHufEjeM1VJEYZGCtSoS9WZmfKZD"
 arising = "8eRLNRfCsDbAgXuFSHufEjeM1VJEYZGCtSoS9WZmfKZD"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "./arising-deployer.json"
 
 [scripts]
