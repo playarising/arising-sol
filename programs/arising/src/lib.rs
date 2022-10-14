@@ -6,7 +6,7 @@ declare_id!("8eRLNRfCsDbAgXuFSHufEjeM1VJEYZGCtSoS9WZmfKZD");
 pub mod arising {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+    pub fn initialize(_ctx: Context<Initialize>) -> Result<()> {
         Ok(())
     }
 }

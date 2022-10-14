@@ -8,7 +8,7 @@ arising = "8eRLNRfCsDbAgXuFSHufEjeM1VJEYZGCtSoS9WZmfKZD"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "mainnet"
+cluster = "localnet"
 wallet = "./arising-deployer.json"
 
 [scripts]
