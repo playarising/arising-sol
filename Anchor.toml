@@ -1,14 +1,18 @@
 [features]
 seeds = false
 skip-lint = false
-[programs.localnet]
-arising = "8eRLNRfCsDbAgXuFSHufEjeM1VJEYZGCtSoS9WZmfKZD"
 
 [registry]
 url = "https://api.apr.dev"
 
+[programs.localnet]
+arising = "8eRLNRfCsDbAgXuFSHufEjeM1VJEYZGCtSoS9WZmfKZD"
+
+[programs.mainnet]
+arising = "8eRLNRfCsDbAgXuFSHufEjeM1VJEYZGCtSoS9WZmfKZD"
+
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "./arising-deployer.json"
 
 [scripts]
