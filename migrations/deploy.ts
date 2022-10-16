@@ -10,4 +10,3 @@ module.exports = async function (provider) {
 
     // Add your deploy script here.
 }
-
