@@ -5,11 +5,14 @@ skip-lint = false
 [registry]
 url = "https://api.apr.dev"
 
+[programs.mainnet]
+arising = "EbYrmqgXkZsCxCP6tqWMCUTRcy1g9Q2asv3aeGDmBi1w"
+
 [programs.localnet]
-arising = "8eRLNRfCsDbAgXuFSHufEjeM1VJEYZGCtSoS9WZmfKZD"
+arising = "EbYrmqgXkZsCxCP6tqWMCUTRcy1g9Q2asv3aeGDmBi1w"
 
 [provider]
-cluster = "localnet"
+cluster = "mainnet"
 wallet = "./arising-deployer.json"
 
 [scripts]

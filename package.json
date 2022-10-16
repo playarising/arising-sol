@@ -6,7 +6,8 @@
     "scripts": {
         "format": "prettier --write '**/*.{ts,tsx,js,jsx,json,md,rs}'",
         "build": "anchor build",
-        "test": "anchor test"
+        "test": "anchor test --provider.cluster=localnet",
+        "deploy": "anchor deploy --provider.cluster=mainnet"
     },
     "dependencies": {
         "@project-serum/anchor": "0.25.0"

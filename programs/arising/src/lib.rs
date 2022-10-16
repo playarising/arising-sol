@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("8eRLNRfCsDbAgXuFSHufEjeM1VJEYZGCtSoS9WZmfKZD");
+declare_id!("EbYrmqgXkZsCxCP6tqWMCUTRcy1g9Q2asv3aeGDmBi1w");
 
 const CONFIG_PREFIX: &str = "arising_config_account";
 
