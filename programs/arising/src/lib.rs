@@ -14,6 +14,10 @@ pub mod arising {
         config.initialized = true;
         config.paused = true;
         config.authority = ctx.accounts.authority.unsigned_key().clone();
+        config.seconds_between_refreshes = 86_400; // 1 day
+        config.seconds_between_paid_refreshes = 86_400; // 1 day
+        config.experience_multiplier = 1;
+        config.max_characters = 30_000;
         Ok(())
     }
 
@@ -24,7 +28,9 @@ pub mod arising {
         Ok(())
     }
 
-    pub fn add_character(ctx: Context<AddCharacter>) -> Result<()> {
+    pub fn add_character(ctx: Context<AddCharacter>, mint: Pubkey, _bump: u8) -> Result<()> {
+        let character = &mut ctx.accounts.character;
+        character.mint = mint;
         Ok(())
     }
 }
@@ -40,6 +46,7 @@ pub struct SetPause<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(mint: Pubkey, bump: u8)]
 pub struct AddCharacter<'info> {
     #[account(mut,
         constraint = payer.key() == config.authority @ ErrorCode::InvalidAuthority)]
@@ -48,21 +55,15 @@ pub struct AddCharacter<'info> {
     #[account(mut)]
     pub config: Account<'info, Config>,
 
-    #[account(mut)]
-    pub mint: Account<'info, CharacterMint>,
-
     #[account(
         init,
         payer = payer,
-        seeds = [
-            CHARACTER_PREFIX.as_bytes(),
-            mint.to_account_info().key.as_ref(),
-            payer.key.as_ref(),
-        ],
+        seeds = [CHARACTER_PREFIX.as_bytes(), &mint.to_bytes()],
         bump,
-        space = CONFIG_ACCOUNT_SIZE
+        space = CHARACTER_ACCOUNT_SIZE
     )]
-    pub character: Account<'info, CharacterData>,
+    pub character: Account<'info, Character>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -82,12 +83,6 @@ pub struct Initialize<'info> {
     pub authority: Signer<'info>,
 
     pub system_program: Program<'info, System>,
-}
-
-#[account]
-#[derive(Default)]
-pub struct CharacterMint {
-    mint: Pubkey,
 }
 
 pub const BASE_STATS_SIZE: usize =
@@ -172,7 +167,7 @@ pub const CHARACTER_ACCOUNT_SIZE: usize =
     CHARACTER_EQUIPMENT_SIZE; // equipment
 
 #[account]
-pub struct CharacterData {
+pub struct Character {
     level: u32,
     mint: Pubkey,
     base_stats: BaseStats,
@@ -191,16 +186,26 @@ pub const CONFIG_ACCOUNT_SIZE: usize =
     8 + // discriminator
     1 + // paused
     1 + // initialized
-    32; // authority
+    32 + // authority
+    32 + // seconds_between_refreshes
+    32 + // seconds_between_paid_refreshes
+    32 + // max_characters
+    32; // experience_multiplier
 
+/// Arising program config settings.
 #[account]
 #[derive(Default)]
 pub struct Config {
     paused: bool,
     initialized: bool,
     authority: Pubkey,
+    seconds_between_refreshes: u32,
+    seconds_between_paid_refreshes: u32,
+    max_characters: u32,
+    experience_multiplier: u32,
 }
 
+/// Program error codes.
 #[error_code]
 pub enum ErrorCode {
     #[msg("Authority is not the program authority")]
