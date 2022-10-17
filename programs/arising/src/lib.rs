@@ -1,4 +1,5 @@
 pub mod codex;
+pub mod checks;
 
 use anchor_lang::prelude::*;
 
@@ -10,6 +11,7 @@ const CHARACTER_PREFIX: &str = "arising_character_account";
 #[program]
 pub mod arising {
     use codex::*;
+    use checks::*;
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>, _bump: u8) -> Result<()> {
