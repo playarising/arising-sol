@@ -1,3 +1,5 @@
+pub mod codex;
+
 use anchor_lang::prelude::*;
 
 declare_id!("EbYrmqgXkZsCxCP6tqWMCUTRcy1g9Q2asv3aeGDmBi1w");
@@ -7,6 +9,7 @@ const CHARACTER_PREFIX: &str = "arising_character_account";
 
 #[program]
 pub mod arising {
+    use codex::*;
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>, _bump: u8) -> Result<()> {
