@@ -90,11 +90,13 @@ pub struct Initialize<'info> {
     pub system_program: Program<'info, System>,
 }
 
+/// The size of the character stats.
 pub const BASE_STATS_SIZE: usize =
     32 + // might
     32 + // speed
     32; // intellect
 
+/// The struct for character stats.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct BaseStats {
     might: u32,
@@ -102,11 +104,13 @@ pub struct BaseStats {
     intellect: u32,
 }
 
+/// The size of the character struct for actions.
 pub const CHARACTER_SLOT_SIZE: usize =
     32 + // cooldown
     32 + // last_recipe
     1; // last_recipe_claimed
 
+/// The struct for slots used for character actions.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct CharacterSlot {
     cooldown: u32,
@@ -114,16 +118,19 @@ pub struct CharacterSlot {
     last_recipe_claimed: bool,
 }
 
+/// The size of the slot in bytes
 pub const EQUIPMENT_SLOT_SIZE: usize =
     32 + // id
     1; // equiped
 
+/// One slot for the character equipment.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct EquipmentSlot {
     mint: Pubkey,
     equiped: bool,
 }
 
+/// The character informationsize in bytes.
 pub const CHARACTER_EQUIPMENT_SIZE: usize =
     EQUIPMENT_SLOT_SIZE + // helmer
     EQUIPMENT_SLOT_SIZE + // shoulder_guards
@@ -139,6 +146,7 @@ pub const CHARACTER_EQUIPMENT_SIZE: usize =
     EQUIPMENT_SLOT_SIZE + // left_hand
     EQUIPMENT_SLOT_SIZE; // right_hand
 
+/// The character equipment struct.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct CharacterEquipment {
     helmet: EquipmentSlot,
@@ -156,6 +164,7 @@ pub struct CharacterEquipment {
     right_hand: EquipmentSlot,
 }
 
+/// The size of the character metadata in bytes.
 pub const CHARACTER_ACCOUNT_SIZE: usize =
     8 + // discriminator
     32 + // level
@@ -171,6 +180,7 @@ pub const CHARACTER_ACCOUNT_SIZE: usize =
     CHARACTER_SLOT_SIZE + // craft_upgrades
     CHARACTER_EQUIPMENT_SIZE; // equipment
 
+/// The full metadata information for an Arising character.
 #[account]
 pub struct Character {
     level: u32,
@@ -187,6 +197,7 @@ pub struct Character {
     equipment: CharacterEquipment,
 }
 
+/// Config account bytes size.
 pub const CONFIG_ACCOUNT_SIZE: usize =
     8 + // discriminator
     1 + // paused
