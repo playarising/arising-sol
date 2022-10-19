@@ -6,10 +6,10 @@ skip-lint = false
 url = "https://api.apr.dev"
 
 [programs.mainnet]
-arising = "EbYrmqgXkZsCxCP6tqWMCUTRcy1g9Q2asv3aeGDmBi1w"
+arising = "GT1koQQwD6ZV6bxciNSwC3YFDHiByySKZbQ2MQJF4GWp"
 
 [programs.localnet]
-arising = "EbYrmqgXkZsCxCP6tqWMCUTRcy1g9Q2asv3aeGDmBi1w"
+arising = "GT1koQQwD6ZV6bxciNSwC3YFDHiByySKZbQ2MQJF4GWp"
 
 [provider]
 cluster = "mainnet"

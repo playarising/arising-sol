@@ -1,5 +1,3 @@
-use anchor_lang::prelude::*;
-
 struct Level {
     min: u32,
     max: u32,
@@ -159,22 +157,16 @@ static LEVELS: [Level; 150] = [
 ];
 
 #[inline(always)]
-pub fn get_level(experience: u32) -> Result<u32> {
+pub fn get_level(experience: u32) -> u32 {
     let mut n: u32 = 0;
-
-    let mut level: u32 = 0;
 
     loop {
         if experience >= LEVELS[n as usize].min && experience < LEVELS[n as usize].max {
-            level = n;
-            break;
+            return n;
         }
         if n > 150 {
-            level = 150;
-            break;
+            return 150;
         }
         n += 1;
     }
-
-    Ok(level)
 }

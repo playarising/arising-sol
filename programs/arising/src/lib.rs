@@ -1,17 +1,14 @@
-pub mod codex;
 pub mod checks;
 
 use anchor_lang::prelude::*;
 
-declare_id!("EbYrmqgXkZsCxCP6tqWMCUTRcy1g9Q2asv3aeGDmBi1w");
+declare_id!("GT1koQQwD6ZV6bxciNSwC3YFDHiByySKZbQ2MQJF4GWp");
 
 const CONFIG_PREFIX: &str = "arising_config_account";
 const CHARACTER_PREFIX: &str = "arising_character_account";
 
 #[program]
 pub mod arising {
-    use codex::*;
-    use checks::*;
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>, _bump: u8) -> Result<()> {
@@ -224,6 +221,8 @@ pub struct Config {
 /// Program error codes.
 #[error_code]
 pub enum ErrorCode {
-    #[msg("Authority is not the program authority")]
+    #[msg("Authority is not the program authority.")]
     InvalidAuthority,
+    #[msg("Payer is not owner of the token.")]
+    InvalidOwner,
 }
