@@ -8,9 +8,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --all-features
+      - name: Install Solana
+        run: | 
+          sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
 
 
