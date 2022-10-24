@@ -10,17 +10,12 @@ jobs:
       - uses: actions/setup-node@v3
       - name: Install Solana
         run: | 
-          sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
-      - name: Cargo Build
-        uses: actions-rs/cargo@v1
-        id: build
-        with:
-          command: build          
+          sh -c "$(curl -sSfL https://release.solana.com/stable/install)"       
       - name: Cache Build
         id: arising-build
         uses: actions/cache@v3
         with:
           path: target
-          key: ${{ steps.build.outputs.rustc_hash }}-arising          
+          key: ${{ hashFiles(Cargo.lock) }}-arising          
 
 
