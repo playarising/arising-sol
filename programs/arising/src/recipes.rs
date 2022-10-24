@@ -9,19 +9,6 @@ const UPGRADE_RECIPE_PREFIX: &str = "arsing_upgrade";
 const FORGE_RECIPE_PREFIX: &str = "arising_forge_recipe";
 
 #[derive(Accounts)]
-pub struct UpdateForgeRecipeAvailability<'info> {
-    #[account(mut,
-            constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority)]
-    payer: Signer<'info>,
-
-    #[account(mut)]
-    pub config: Account<'info, Config>,
-
-    #[account(mut)]
-    pub forge_recipe: Account<'info, ForgeRecipe>,
-}
-
-#[derive(Accounts)]
 pub struct UpdateForgeRecipe<'info> {
     #[account(mut,
         constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority)]
@@ -57,6 +44,19 @@ pub struct AddForgeRecipe<'info> {
 }
 
 #[derive(Accounts)]
+pub struct UpdateCraftRecipe<'info> {
+    #[account(mut,
+        constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority)]
+    payer: Signer<'info>,
+
+    #[account(mut)]
+    pub config: Account<'info, Config>,
+
+    #[account(mut)]
+    pub craft_recipe: Account<'info, CraftRecipe>,
+}
+
+#[derive(Accounts)]
 #[instruction(bump: u8, id: u16)]
 pub struct AddCraftRecipe<'info> {
     #[account(mut,
@@ -79,6 +79,19 @@ pub struct AddCraftRecipe<'info> {
 }
 
 #[derive(Accounts)]
+pub struct UpdateUpgradeRecipe<'info> {
+    #[account(mut,
+        constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority)]
+    payer: Signer<'info>,
+
+    #[account(mut)]
+    pub config: Account<'info, Config>,
+
+    #[account(mut)]
+    pub upgrade_recipe: Account<'info, UpgradeRecipe>,
+}
+
+#[derive(Accounts)]
 #[instruction(bump: u8, id: u16)]
 pub struct AddUpgradeRecipe<'info> {
     #[account(mut,
@@ -91,11 +104,11 @@ pub struct AddUpgradeRecipe<'info> {
     #[account(
         init,
         payer = payer,
-        seeds = [CRAFT_RECIPE_PREFIX.as_bytes(), &id.to_be_bytes()],
+        seeds = [UPGRADE_RECIPE_PREFIX.as_bytes(), &id.to_be_bytes()],
         bump,
         space = RECIPE_SIZE
     )]
-    pub craft_recipe: Account<'info, CraftRecipe>,
+    pub upgrade_recipe: Account<'info, UpgradeRecipe>,
 
     pub system_program: Program<'info, System>,
 }

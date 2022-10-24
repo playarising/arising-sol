@@ -10,6 +10,7 @@ use config::*;
 use characters::*;
 use recipes::*;
 use errors::*;
+use codex::*;
 
 declare_id!("GT1koQQwD6ZV6bxciNSwC3YFDHiByySKZbQ2MQJF4GWp");
 
@@ -54,7 +55,7 @@ pub mod arising {
         id: u16,
         data: Recipe
     ) -> Result<()> {
-        let forge_recipe = &mut ctx.accounts.forge_recipe;
+        let recipe = &mut ctx.accounts.forge_recipe;
 
         let config = &mut ctx.accounts.config;
 
@@ -64,18 +65,18 @@ pub mod arising {
 
         msg!("Adding forge recipe {} with id {}", data.name, id);
 
-        forge_recipe.recipe.id = id;
-        forge_recipe.recipe.name = data.name;
-        forge_recipe.recipe.description = data.description;
-        forge_recipe.recipe.materials = data.materials;
-        forge_recipe.recipe.materials_amounts = data.materials_amounts;
-        forge_recipe.recipe.stats_required = data.stats_required;
-        forge_recipe.recipe.stats_sacrificed = data.stats_sacrificed;
-        forge_recipe.recipe.cooldown = data.cooldown;
-        forge_recipe.recipe.level_required = data.level_required;
-        forge_recipe.recipe.item_rewarded = data.item_rewarded;
-        forge_recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
-        forge_recipe.recipe.available = false;
+        recipe.recipe.id = id;
+        recipe.recipe.name = data.name;
+        recipe.recipe.description = data.description;
+        recipe.recipe.materials = data.materials;
+        recipe.recipe.materials_amounts = data.materials_amounts;
+        recipe.recipe.stats_required = data.stats_required;
+        recipe.recipe.stats_sacrificed = data.stats_sacrificed;
+        recipe.recipe.cooldown = data.cooldown;
+        recipe.recipe.level_required = data.level_required;
+        recipe.recipe.item_rewarded = data.item_rewarded;
+        recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
+        recipe.recipe.available = false;
 
         config.forge_recipes += 1;
 
@@ -83,34 +84,168 @@ pub mod arising {
     }
 
     pub fn update_forge_recipe_availability(
-        ctx: Context<UpdateForgeRecipeAvailability>,
+        ctx: Context<UpdateForgeRecipe>,
         available: bool
     ) -> Result<()> {
-        let forge_recipe = &mut ctx.accounts.forge_recipe;
+        let recipe = &mut ctx.accounts.forge_recipe;
 
-        msg!("Updating forge recipe id {} availability to {}", forge_recipe.recipe.id, available);
+        msg!("Updating forge recipe id {} availability to {}", recipe.recipe.id, available);
 
-        forge_recipe.recipe.available = available;
+        recipe.recipe.available = available;
 
         Ok(())
     }
 
     pub fn update_forge_recipe(ctx: Context<UpdateForgeRecipe>, data: Recipe) -> Result<()> {
-        let forge_recipe = &mut ctx.accounts.forge_recipe;
+        let recipe = &mut ctx.accounts.forge_recipe;
 
-        msg!("Updating forge recipe id {}", forge_recipe.recipe.id);
+        msg!("Updating forge recipe id {}", recipe.recipe.id);
 
-        forge_recipe.recipe.name = data.name;
-        forge_recipe.recipe.description = data.description;
-        forge_recipe.recipe.materials = data.materials;
-        forge_recipe.recipe.materials_amounts = data.materials_amounts;
-        forge_recipe.recipe.stats_required = data.stats_required;
-        forge_recipe.recipe.stats_sacrificed = data.stats_sacrificed;
-        forge_recipe.recipe.cooldown = data.cooldown;
-        forge_recipe.recipe.level_required = data.level_required;
-        forge_recipe.recipe.item_rewarded = data.item_rewarded;
-        forge_recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
-        forge_recipe.recipe.available = false;
+        recipe.recipe.name = data.name;
+        recipe.recipe.description = data.description;
+        recipe.recipe.materials = data.materials;
+        recipe.recipe.materials_amounts = data.materials_amounts;
+        recipe.recipe.stats_required = data.stats_required;
+        recipe.recipe.stats_sacrificed = data.stats_sacrificed;
+        recipe.recipe.cooldown = data.cooldown;
+        recipe.recipe.level_required = data.level_required;
+        recipe.recipe.item_rewarded = data.item_rewarded;
+        recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
+        recipe.recipe.available = false;
+
+        Ok(())
+    }
+
+    pub fn add_craft_recipe(
+        ctx: Context<AddCraftRecipe>,
+        _bump: u8,
+        id: u16,
+        data: Recipe
+    ) -> Result<()> {
+        let recipe = &mut ctx.accounts.craft_recipe;
+
+        let config = &mut ctx.accounts.config;
+
+        if id != config.craft_recipes + 1 {
+            return Err(ArisingError::InvalidCraftRecipeID.into());
+        }
+
+        msg!("Adding craft recipe {} with id {}", data.name, id);
+
+        recipe.recipe.id = id;
+        recipe.recipe.name = data.name;
+        recipe.recipe.description = data.description;
+        recipe.recipe.materials = data.materials;
+        recipe.recipe.materials_amounts = data.materials_amounts;
+        recipe.recipe.stats_required = data.stats_required;
+        recipe.recipe.stats_sacrificed = data.stats_sacrificed;
+        recipe.recipe.cooldown = data.cooldown;
+        recipe.recipe.level_required = data.level_required;
+        recipe.recipe.item_rewarded = data.item_rewarded;
+        recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
+        recipe.recipe.available = false;
+
+        config.craft_recipes += 1;
+
+        Ok(())
+    }
+
+    pub fn update_craft_recipe_availability(
+        ctx: Context<UpdateCraftRecipe>,
+        available: bool
+    ) -> Result<()> {
+        let recipe = &mut ctx.accounts.craft_recipe;
+
+        msg!("Updating craft recipe id {} availability to {}", recipe.recipe.id, available);
+
+        recipe.recipe.available = available;
+
+        Ok(())
+    }
+
+    pub fn update_craft_recipe(ctx: Context<UpdateCraftRecipe>, data: Recipe) -> Result<()> {
+        let recipe = &mut ctx.accounts.craft_recipe;
+
+        msg!("Updating craft recipe id {}", recipe.recipe.id);
+
+        recipe.recipe.name = data.name;
+        recipe.recipe.description = data.description;
+        recipe.recipe.materials = data.materials;
+        recipe.recipe.materials_amounts = data.materials_amounts;
+        recipe.recipe.stats_required = data.stats_required;
+        recipe.recipe.stats_sacrificed = data.stats_sacrificed;
+        recipe.recipe.cooldown = data.cooldown;
+        recipe.recipe.level_required = data.level_required;
+        recipe.recipe.item_rewarded = data.item_rewarded;
+        recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
+        recipe.recipe.available = false;
+
+        Ok(())
+    }
+
+    pub fn add_upgrade_recipe(
+        ctx: Context<AddUpgradeRecipe>,
+        _bump: u8,
+        id: u16,
+        data: Recipe
+    ) -> Result<()> {
+        let recipe = &mut ctx.accounts.upgrade_recipe;
+
+        let config = &mut ctx.accounts.config;
+
+        if id != config.upgrade_recipes + 1 {
+            return Err(ArisingError::InvalidUpgradeRecipeID.into());
+        }
+
+        msg!("Adding upgrade recipe {} with id {}", data.name, id);
+
+        recipe.recipe.id = id;
+        recipe.recipe.name = data.name;
+        recipe.recipe.description = data.description;
+        recipe.recipe.materials = data.materials;
+        recipe.recipe.materials_amounts = data.materials_amounts;
+        recipe.recipe.stats_required = data.stats_required;
+        recipe.recipe.stats_sacrificed = data.stats_sacrificed;
+        recipe.recipe.cooldown = data.cooldown;
+        recipe.recipe.level_required = data.level_required;
+        recipe.recipe.item_rewarded = data.item_rewarded;
+        recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
+        recipe.recipe.available = false;
+
+        config.upgrade_recipes += 1;
+
+        Ok(())
+    }
+
+    pub fn update_upgrade_recipe_availability(
+        ctx: Context<UpdateUpgradeRecipe>,
+        available: bool
+    ) -> Result<()> {
+        let recipe = &mut ctx.accounts.upgrade_recipe;
+
+        msg!("Updating upgrade recipe id {} availability to {}", recipe.recipe.id, available);
+
+        recipe.recipe.available = available;
+
+        Ok(())
+    }
+
+    pub fn update_upgrade_recipe(ctx: Context<UpdateUpgradeRecipe>, data: Recipe) -> Result<()> {
+        let recipe = &mut ctx.accounts.upgrade_recipe;
+
+        msg!("Updating upgrade recipe id {}", recipe.recipe.id);
+
+        recipe.recipe.name = data.name;
+        recipe.recipe.description = data.description;
+        recipe.recipe.materials = data.materials;
+        recipe.recipe.materials_amounts = data.materials_amounts;
+        recipe.recipe.stats_required = data.stats_required;
+        recipe.recipe.stats_sacrificed = data.stats_sacrificed;
+        recipe.recipe.cooldown = data.cooldown;
+        recipe.recipe.level_required = data.level_required;
+        recipe.recipe.item_rewarded = data.item_rewarded;
+        recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
+        recipe.recipe.available = false;
 
         Ok(())
     }

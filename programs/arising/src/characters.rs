@@ -117,6 +117,6 @@ pub struct Character {
     pub sacrificed_points: u16,
     pub forge: CharacterSlot,
     pub craft: CharacterSlot,
-    pub craft_upgrades: CharacterSlot,
+    pub upgrade: CharacterSlot,
     pub equipment: CharacterEquipment,
 }

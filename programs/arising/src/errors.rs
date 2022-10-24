@@ -9,4 +9,8 @@ pub enum ArisingError {
     InvalidOwner,
     #[msg("The ID for the forge recipe is invalid")]
     InvalidForgeRecipeID,
+    #[msg("The ID for the craft recipe is invalid")]
+    InvalidCraftRecipeID,
+    #[msg("The ID for the upgrade recipe is invalid")]
+    InvalidUpgradeRecipeID,
 }
