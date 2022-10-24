@@ -1,7 +1,4 @@
-struct Level {
-    min: u32,
-    max: u32,
-}
+use anchor_lang::prelude::*;
 
 static LEVELS: [Level; 150] = [
     Level { min: 1000, max: 2020 },
@@ -169,4 +166,23 @@ pub fn get_level(experience: u32) -> u32 {
         }
         n += 1;
     }
+}
+
+struct Level {
+    min: u32,
+    max: u32,
+}
+
+/// The size of the character stats.
+pub const BASE_STATS_SIZE: usize =
+    16 + // might
+    16 + // speed
+    16; // intellect
+
+/// The struct for character stats.
+#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+pub struct BaseStats {
+    might: u16,
+    speed: u16,
+    intellect: u16,
 }
