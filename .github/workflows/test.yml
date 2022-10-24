@@ -11,11 +11,15 @@ jobs:
       - name: Install Solana
         run: | 
           sh -c "$(curl -sSfL https://release.solana.com/stable/install)"       
+      - name: Install Anchor
+        run: | 
+          cargo install --git https://github.com/project-serum/anchor avm --locked --force
+          avm install latest             
       - name: Cache Build
         id: arising-build
         uses: actions/cache@v3
         with:
           path: target
-          key: ${{ hashFiles(Cargo.lock) }}-arising          
+          key: ${{ hashFiles("Cargo.lock") }}-arising          
 
 
