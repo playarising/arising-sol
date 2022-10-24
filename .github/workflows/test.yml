@@ -11,5 +11,11 @@ jobs:
       - name: Install Solana
         run: | 
           sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+      - name: Cache Build
+        id: arising-build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ rustc_hash }}-arising          
 
 
