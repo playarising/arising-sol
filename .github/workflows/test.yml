@@ -20,6 +20,6 @@ jobs:
         uses: actions/cache@v3
         with:
           path: target
-          key: ${{ hashFiles("Cargo.lock") }}-arising          
+          key: ${{ hashFiles('./Cargo.lock') }}-arising          
 
 
