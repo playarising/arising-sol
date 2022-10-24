@@ -2,7 +2,9 @@ name: Test
 'on': push
 jobs:
     anchor-test:
-        runs-on: 'ghcr.io/eabz/docker-solana-anchor:main'
+        runs-on: ubuntu-latest
+        container:
+            image: ghcr.io/eabz/docker-solana-anchor:main
         steps:
             - uses: actions/checkout@v3
             - name: Cache Build
