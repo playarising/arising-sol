@@ -1,17 +1,15 @@
 name: Test
-
-on: push
-
+'on': push
 jobs:
     anchor-test:
-      runs-on: ghcr.io/eabz/docker-solana-anchor:main
+        runs-on: 'ghcr.io/eabz/docker-solana-anchor:main'
         steps:
-          - uses: actions/checkout@v3
-          - name: Cache Build
-            id: arising-build
-            uses: actions/cache@v3
-            with:
-              path: target
-              key: ${{ hashFiles('./Cargo.lock') }}-arising
-          - name: Build
-            run: yarn build
+            - uses: actions/checkout@v3
+            - name: Cache Build
+              id: arising-build
+              uses: actions/cache@v3
+              with:
+                  path: target
+                  key: "${{ hashFiles('./Cargo.lock') }}-arising"
+            - name: Build
+              run: yarn build
