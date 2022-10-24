@@ -1,4 +1,5 @@
 mod config;
+mod utils;
 mod characters;
 mod errors;
 mod codex;

@@ -3,23 +3,15 @@ name: Test
 on: push
 
 jobs:
-  anchor-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-      - name: Install Solana
-        run: | 
-          sh -c "$(curl -sSfL https://release.solana.com/stable/install)"       
-      - name: Install Anchor
-        run: | 
-          cargo install --git https://github.com/project-serum/anchor avm --locked --force
-          avm install latest             
-      - name: Cache Build
-        id: arising-build
-        uses: actions/cache@v3
-        with:
-          path: target
-          key: ${{ hashFiles('./Cargo.lock') }}-arising          
-
-
+    anchor-test:
+        runs-on: ghcr.io/eabz/docker-solana-anchor:main
+        steps:
+            - uses: actions/checkout@v3
+            - name: Cache Build
+              id: arising-build
+              uses: actions/cache@v3
+              with:
+                  path: target
+                  key: ${{ hashFiles('./Cargo.lock') }}-arising
+            - name: Build
+              run: yarn build
