@@ -5,15 +5,12 @@ skip-lint = false
 [registry]
 url = "https://api.apr.dev"
 
-[programs.mainnet]
-arising = "GT1koQQwD6ZV6bxciNSwC3YFDHiByySKZbQ2MQJF4GWp"
-
-[programs.localnet]
+[programs]
 arising = "GT1koQQwD6ZV6bxciNSwC3YFDHiByySKZbQ2MQJF4GWp"
 
 [provider]
-cluster = "mainnet"
-wallet = "./arising-deployer.json"
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
