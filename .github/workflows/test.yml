@@ -3,17 +3,10 @@ name: Test
 jobs:
     anchor-test:
         runs-on: ubuntu-latest
-        container:
-            image: ghcr.io/eabz/docker-solana-anchor:main
         steps:
             - uses: actions/checkout@v3
-            - name: Cache Build
-              id: arising-build
-              uses: actions/cache@v3
+            - name: Anchor Test
+              uses: mrgnlabs/anchor-test-action@v0.4
               with:
-                  path: target
-                  key: "${{ hashFiles('./Cargo.lock') }}-arising"
-            - name: Set Anchor
-              run: avm install latest && avm use latest
-            - name: Build
-              run: yarn build
+                  args: '--provider.cluster=localnet'
+                  workspace_dir: '.'
