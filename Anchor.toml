@@ -5,7 +5,7 @@ skip-lint = false
 [registry]
 url = "https://api.apr.dev"
 
-[programs]
+[programs.localnet]
 arising = "GT1koQQwD6ZV6bxciNSwC3YFDHiByySKZbQ2MQJF4GWp"
 
 [provider]
