@@ -13,5 +13,7 @@ jobs:
               with:
                   path: target
                   key: "${{ hashFiles('./Cargo.lock') }}-arising"
+            - name: Set Anchor
+              run: avm use latest
             - name: Build
               run: yarn build
