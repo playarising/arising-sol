@@ -1,6 +1,5 @@
 use anchor_lang::{ prelude::*, solana_program::clock };
-use std::convert::TryInto;
 
-pub fn now() -> Result<u64> {
-    Ok(clock::Clock::get()?.unix_timestamp.try_into().unwrap())
+pub fn now() -> u64 {
+    return clock::Clock::get().unwrap().unix_timestamp.try_into().unwrap();
 }

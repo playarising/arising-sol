@@ -8,13 +8,13 @@ pub const CONFIG_ACCOUNT_SIZE: usize =
     1 + // paused
     1 + // initialized
     32 + // authority
-    32 + // seconds_between_refreshes
-    32 + // seconds_between_paid_refreshes
-    32 + // max_characters
-    8 + // experience_multiplier
-    16 + // forge_recipes
-    16 + // craft_recipes
-    16; // upgrade_recipes
+    64 + // seconds_between_refreshes
+    64 + // seconds_between_paid_refreshes
+    64 + // max_characters
+    64 + // experience_multiplier
+    64 + // forge_recipes
+    64 + // craft_recipes
+    64; // upgrade_recipes
 
 /// Arising program config settings.
 #[account]
@@ -23,10 +23,10 @@ pub struct Config {
     pub paused: bool,
     pub initialized: bool,
     pub authority: Pubkey,
-    pub seconds_between_refreshes: u32,
-    pub seconds_between_paid_refreshes: u32,
-    pub max_characters: u32,
-    pub experience_multiplier: u8,
+    pub seconds_between_refreshes: u64,
+    pub seconds_between_paid_refreshes: u64,
+    pub max_characters: u64,
+    pub experience_multiplier: u64,
     pub forge_recipes: u64,
     pub craft_recipes: u64,
     pub upgrade_recipes: u64,

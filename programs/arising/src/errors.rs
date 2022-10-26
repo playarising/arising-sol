@@ -19,4 +19,10 @@ pub enum ArisingError {
     InvalidCharacterOwner,
     #[msg("The amount of points you are trying to assign is invalid")]
     InvalidAssignPoints,
+    #[msg("Not enough pool points to consume")]
+    NotEnoughPoolPointsToConsume,
+    #[msg("Not enough base points to sacrifice")]
+    NotEnoughBasePointsToSacrifice,
+    #[msg("Character is not able to do a refresh now")]
+    RefreshNotAvailable,
 }

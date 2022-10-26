@@ -5,12 +5,72 @@ use crate::config::*;
 use crate::errors::*;
 use crate::codex::*;
 use crate::checks::*;
+use crate::utils::*;
 
 const CHARACTER_PREFIX: &str = "arising_character_account";
 
 #[inline(always)]
+pub fn refresh(config: &Account<Config>, character: &mut Account<Character>) -> Result<()> {
+    if character.last_refresh + config.seconds_between_refreshes < now() {
+        return Err(ArisingError::RefreshNotAvailable.into());
+    }
+
+    character.pool_stats.might = character.base_stats.might;
+    character.pool_stats.speed = character.base_stats.speed;
+    character.pool_stats.intellect = character.base_stats.intellect;
+
+    return Ok(());
+}
+
+#[inline(always)]
 pub fn get_character_assignable_points(character: &Account<Character>) -> u64 {
     return (6 + character.level).into();
+}
+
+#[inline(always)]
+pub fn consume_points(character: &mut Account<Character>, points: BaseStats) -> Result<()> {
+    if character.pool_stats.might < points.might {
+        return Err(ArisingError::NotEnoughPoolPointsToConsume.into());
+    }
+
+    if character.pool_stats.speed < points.speed {
+        return Err(ArisingError::NotEnoughPoolPointsToConsume.into());
+    }
+
+    if character.pool_stats.intellect < points.intellect {
+        return Err(ArisingError::NotEnoughPoolPointsToConsume.into());
+    }
+
+    character.pool_stats.might -= points.might;
+    character.pool_stats.speed -= points.speed;
+    character.pool_stats.intellect -= points.intellect;
+
+    return Ok(());
+}
+
+#[inline(always)]
+pub fn sacrifice_points(character: &mut Account<Character>, points: BaseStats) -> Result<()> {
+    if character.base_stats.might < points.might {
+        return Err(ArisingError::NotEnoughBasePointsToSacrifice.into());
+    }
+
+    if character.base_stats.speed < points.speed {
+        return Err(ArisingError::NotEnoughBasePointsToSacrifice.into());
+    }
+
+    if character.base_stats.intellect < points.intellect {
+        return Err(ArisingError::NotEnoughBasePointsToSacrifice.into());
+    }
+
+    character.base_stats.might -= points.might;
+    character.base_stats.speed -= points.speed;
+    character.base_stats.intellect -= points.intellect;
+
+    let sum = points.might + points.speed + points.intellect;
+
+    character.sacrificed_points += sum;
+
+    return Ok(());
 }
 
 #[derive(Accounts)]
@@ -53,14 +113,14 @@ pub struct CharacterAccess<'info> {
 /// The size of the character struct for actions.
 pub const CHARACTER_SLOT_SIZE: usize =
     64 + // cooldown
-    16 + // last_recipe
+    64 + // last_recipe
     1; // last_recipe_claimed
 
 /// The struct for slots used for character actions.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct CharacterSlot {
     pub cooldown: u64,
-    pub last_recipe: u16,
+    pub last_recipe: u64,
     pub last_recipe_claimed: bool,
 }
 
@@ -113,14 +173,14 @@ pub struct CharacterEquipment {
 /// The size of the character metadata in bytes.
 pub const CHARACTER_ACCOUNT_SIZE: usize =
     8 + // discriminator
-    16 + // level
+    64 + // level
     32 + // mint
     BASE_STATS_SIZE + // base_stats
     BASE_STATS_SIZE + // pool_stats
-    32 + // experience
-    32 + // last_refresh
-    32 + // last_refresh_with_refresher
-    16 + // sacrificed_points
+    64 + // experience
+    64 + // last_refresh
+    64 + // last_refresh_with_refresher
+    64 + // sacrificed_points
     CHARACTER_SLOT_SIZE + // forge
     CHARACTER_SLOT_SIZE + // craft
     CHARACTER_SLOT_SIZE + // craft_upgrades
@@ -129,14 +189,14 @@ pub const CHARACTER_ACCOUNT_SIZE: usize =
 /// The full metadata information for an Arising character.
 #[account]
 pub struct Character {
-    pub level: u16,
+    pub level: u64,
     pub mint: Pubkey,
     pub base_stats: BaseStats,
     pub pool_stats: BaseStats,
-    pub experience: u32,
-    pub last_refresh: u32,
-    pub last_refresh_with_refresher: u32,
-    pub sacrificed_points: u16,
+    pub experience: u64,
+    pub last_refresh: u64,
+    pub last_refresh_with_refresher: u64,
+    pub sacrificed_points: u64,
     pub forge: CharacterSlot,
     pub craft: CharacterSlot,
     pub upgrade: CharacterSlot,
