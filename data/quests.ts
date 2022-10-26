@@ -8,18 +8,20 @@ import {
     EmptyBaseStats,
     toAnchorFriendlyBaseAttributes,
     toAnchorFriendlyBaseStats,
+    toNormalBaseAttributes,
+    toNormalBaseStats,
 } from './stats'
 import * as anchor from '@project-serum/anchor'
 
 export enum QUESTS {
-    BEG,
+    BEG = 1,
     FIND_WOOD,
     FIND_STONE,
     RAT_HUNTING,
 }
 
 export enum QUEST_TYPE {
-    JOB,
+    JOB = 1,
     FARM,
     RAID,
 }
@@ -28,7 +30,7 @@ interface AnchorFriendlyQuest {
     id: anchor.BN
     name: string
     description: string
-    type: anchor.BN
+    questType: anchor.BN
     statsRequired: AnchorFriendlyBaseStats
     cooldown: anchor.BN
     levelRequired: anchor.BN
@@ -44,7 +46,7 @@ interface QuestData {
     id: QUESTS
     name: string
     description: string
-    type: QUEST_TYPE
+    questType: QUEST_TYPE
     statsRequired: BaseStats
     cooldown: number
     levelRequired: number
@@ -61,7 +63,7 @@ export function toAnchorFriendlyQuest(quest: QuestData): AnchorFriendlyQuest {
         id: new anchor.BN(quest.id),
         name: quest.name,
         description: quest.description,
-        type: new anchor.BN(quest.type),
+        questType: new anchor.BN(quest.questType),
         statsRequired: toAnchorFriendlyBaseStats(quest.statsRequired),
         cooldown: new anchor.BN(quest.cooldown),
         levelRequired: new anchor.BN(quest.levelRequired),
@@ -80,6 +82,28 @@ export function toAnchorFriendlyQuest(quest: QuestData): AnchorFriendlyQuest {
     }
 }
 
+export function toNormalQuest(quest: AnchorFriendlyQuest): QuestData {
+    return {
+        id: quest.id.toNumber(),
+        name: quest.name,
+        description: quest.description,
+        questType: quest.questType.toNumber(),
+        statsRequired: toNormalBaseStats(quest.statsRequired),
+        cooldown: quest.cooldown.toNumber(),
+        levelRequired: quest.levelRequired.toNumber(),
+        materialsReward: quest.materialsReward
+            .map((material) => material.toNumber())
+            .filter((material) => material !== 0),
+        materialsAmounts: quest.materialsAmounts
+            .map((amount) => amount.toNumber())
+            .filter((amount) => amount !== 0),
+        mobExperience: quest.mobExperience.toNumber(),
+        mobLevel: quest.mobLevel.toNumber(),
+        mobBaseStats: toNormalBaseStats(quest.mobBaseStats),
+        mobBaseAttributes: toNormalBaseAttributes(quest.mobBaseAttributes),
+    }
+}
+
 export const QUESTS_DATA: {
     [k in QUESTS]: QuestData
 } = {
@@ -87,7 +111,7 @@ export const QUESTS_DATA: {
         id: QUESTS.BEG,
         name: 'Beg',
         description: 'Look for a place to beg some money and spend your time',
-        type: QUEST_TYPE.JOB,
+        questType: QUEST_TYPE.JOB,
         statsRequired: { might: 0, speed: 1, intellect: 1 },
         cooldown: 600,
         levelRequired: 0,
@@ -102,7 +126,7 @@ export const QUESTS_DATA: {
         id: QUESTS.FIND_WOOD,
         name: 'Find Wood',
         description: 'Walk to the forest and recollect the wood branches',
-        type: QUEST_TYPE.FARM,
+        questType: QUEST_TYPE.FARM,
         statsRequired: { might: 1, speed: 1, intellect: 0 },
         cooldown: 600,
         levelRequired: 0,
@@ -117,7 +141,7 @@ export const QUESTS_DATA: {
         id: QUESTS.FIND_STONE,
         name: 'Find Stone',
         description: 'Walt to the roads and recollect some stones',
-        type: QUEST_TYPE.FARM,
+        questType: QUEST_TYPE.FARM,
         statsRequired: { might: 1, speed: 1, intellect: 0 },
         cooldown: 600,
         levelRequired: 0,
@@ -132,7 +156,7 @@ export const QUESTS_DATA: {
         id: QUESTS.RAT_HUNTING,
         name: 'Rat Hunting',
         description: 'Look through the sewers for rats to kill',
-        type: QUEST_TYPE.RAID,
+        questType: QUEST_TYPE.RAID,
         statsRequired: { might: 1, speed: 1, intellect: 1 },
         cooldown: 600,
         levelRequired: 0,
@@ -145,8 +169,8 @@ export const QUESTS_DATA: {
             atk: 1,
             def: 1,
             range: 1,
-            mag_atk: 0,
-            mag_def: 0,
+            magAtk: 0,
+            magDef: 0,
             rate: 1,
         },
     },

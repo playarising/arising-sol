@@ -1,5 +1,5 @@
 export enum BASIC_MATERIAL {
-    WOOD_PLANK,
+    WOOD_PLANK = 1,
     IRONSTONE,
     WOOL_FABRIC,
     HARDENED_LEATHER,

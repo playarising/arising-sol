@@ -3,9 +3,15 @@ import { Program } from '@project-serum/anchor'
 import { expect } from 'chai'
 import { toAnchorFriendlyID } from '../data/common'
 import {
+    QUESTS_DATA,
+    toAnchorFriendlyQuest,
+    toNormalQuest,
+} from '../data/quests'
+import {
     CRAFT_RECIPES_DATA,
     FORGE_RECIPES_DATA,
     toAnchorFriendlyRecipe,
+    toNormalRecipe,
 } from '../data/recipes'
 import { Arising } from '../target/types/arising'
 
@@ -13,6 +19,7 @@ const CONFIG_PREFIX = 'arising_config_account'
 const CHARACTER_PREFIX = 'arising_character_account'
 const FORGE_RECIPE_PREFIX = 'arising_forge_recipe'
 const CRAFT_RECIPE_PREFIX = 'arsing_craft'
+const QUEST_PREFIX = 'arising_quest'
 
 describe('arising', () => {
     anchor.setProvider(anchor.AnchorProvider.env())
@@ -228,6 +235,38 @@ describe('arising', () => {
         }
     })
 
+    it('Add quests', async () => {
+        const keys = Object.keys(QUESTS_DATA)
+
+        const [config_program_address] =
+            await anchor.web3.PublicKey.findProgramAddress(
+                [Buffer.from(CONFIG_PREFIX), authority.publicKey.toBuffer()],
+                program.programId
+            )
+
+        for (const key of keys) {
+            const quest = QUESTS_DATA[key]
+
+            const [quest_account, bump] =
+                await anchor.web3.PublicKey.findProgramAddress(
+                    [Buffer.from(QUEST_PREFIX), toAnchorFriendlyID(quest.id)],
+                    program.programId
+                )
+
+            const anchorQuest = toAnchorFriendlyQuest(quest)
+
+            await program.methods
+                // @ts-ignore
+                .addQuest(bump, new anchor.BN(quest.id), anchorQuest)
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    quest: quest_account,
+                })
+                .rpc()
+        }
+    })
+
     it('Fetch all forge recipes modify them and compare', async () => {
         const keys = Object.keys(FORGE_RECIPES_DATA)
 
@@ -240,7 +279,7 @@ describe('arising', () => {
         for (const key of keys) {
             const recipe = FORGE_RECIPES_DATA[key]
 
-            const [recipe_account, bump] =
+            const [recipe_account] =
                 await anchor.web3.PublicKey.findProgramAddress(
                     [
                         Buffer.from(FORGE_RECIPE_PREFIX),
@@ -253,7 +292,7 @@ describe('arising', () => {
                 recipe_account
             )
 
-            expect(anchorRecipe.recipe.name).to.eq(recipe.name)
+            expect(toNormalRecipe(anchorRecipe.recipe)).to.deep.equal(recipe)
             expect(anchorRecipe.recipe.available).to.eq(false)
 
             await program.methods
@@ -285,11 +324,23 @@ describe('arising', () => {
                 })
                 .rpc()
 
+            recipe.name = newName
+
             anchorRecipe = await program.account.forgeRecipe.fetch(
                 recipe_account
             )
 
-            expect(anchorRecipe.recipe.name).to.eq(newName)
+            expect(toNormalRecipe(anchorRecipe.recipe)).to.deep.eq(recipe)
+
+            await program.methods
+                // @ts-ignore
+                .updateForgeRecipe(toAnchorFriendlyRecipe(recipe))
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    forgeRecipe: recipe_account,
+                })
+                .rpc()
         }
     })
 
@@ -305,7 +356,7 @@ describe('arising', () => {
         for (const key of keys) {
             const recipe = CRAFT_RECIPES_DATA[key]
 
-            const [recipe_account, bump] =
+            const [recipe_account] =
                 await anchor.web3.PublicKey.findProgramAddress(
                     [
                         Buffer.from(CRAFT_RECIPE_PREFIX),
@@ -318,7 +369,7 @@ describe('arising', () => {
                 recipe_account
             )
 
-            expect(anchorRecipe.recipe.name).to.eq(recipe.name)
+            expect(toNormalRecipe(anchorRecipe.recipe)).to.deep.equal(recipe)
             expect(anchorRecipe.recipe.available).to.eq(false)
 
             await program.methods
@@ -350,11 +401,99 @@ describe('arising', () => {
                 })
                 .rpc()
 
+            recipe.name = newName
+
             anchorRecipe = await program.account.craftRecipe.fetch(
                 recipe_account
             )
 
-            expect(anchorRecipe.recipe.name).to.eq(newName)
+            expect(toNormalRecipe(anchorRecipe.recipe)).to.deep.eq(recipe)
+
+            await program.methods
+                // @ts-ignore
+                .updateCraftRecipe(toAnchorFriendlyRecipe(recipe))
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    craftRecipe: recipe_account,
+                })
+                .rpc()
         }
     })
+
+    it('Fetch all quests modify them and compare', async () => {
+        const keys = Object.keys(QUESTS_DATA)
+
+        const [config_program_address] =
+            await anchor.web3.PublicKey.findProgramAddress(
+                [Buffer.from(CONFIG_PREFIX), authority.publicKey.toBuffer()],
+                program.programId
+            )
+
+        for (const key of keys) {
+            const quest = QUESTS_DATA[key]
+
+            const [quest_account] =
+                await anchor.web3.PublicKey.findProgramAddress(
+                    [Buffer.from(QUEST_PREFIX), toAnchorFriendlyID(quest.id)],
+                    program.programId
+                )
+
+            let anchorQuest = await program.account.quest.fetch(quest_account)
+
+            expect(toNormalQuest(anchorQuest)).to.deep.equal(quest)
+            expect(anchorQuest.available).to.eq(false)
+
+            await program.methods
+                .updateQuestAvailability(true)
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    quest: quest_account,
+                })
+                .rpc()
+
+            anchorQuest = await program.account.quest.fetch(quest_account)
+
+            expect(anchorQuest.available).to.eq(true)
+
+            const newName = 'New Quest Name'
+            const anchorNewData = toAnchorFriendlyQuest(quest)
+            anchorNewData.name = newName
+
+            await program.methods
+                // @ts-ignore
+                .updateQuest(anchorNewData)
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    quest: quest_account,
+                })
+                .rpc()
+
+            quest.name = newName
+
+            anchorQuest = await program.account.quest.fetch(quest_account)
+
+            expect(toNormalQuest(anchorQuest)).to.deep.eq(quest)
+
+            await program.methods
+                // @ts-ignore
+                .updateQuest(toAnchorFriendlyQuest(quest))
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    quest: quest_account,
+                })
+                .rpc()
+        }
+    })
+
+    /*
+    it('Fetch all data', async () => {
+        const forge_recipes = await program.account.forgeRecipe.all()
+        const craft_recipes = await program.account.craftRecipe.all()
+        const quests = await program.account.quest.all()
+        console.log(forge_recipes, craft_recipes, quests)
+    }) */
 })

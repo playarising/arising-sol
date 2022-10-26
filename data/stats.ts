@@ -22,12 +22,20 @@ export function toAnchorFriendlyBaseStats(
     }
 }
 
+export function toNormalBaseStats(stats: AnchorFriendlyBaseStats): BaseStats {
+    return {
+        might: stats.might.toNumber(),
+        speed: stats.speed.toNumber(),
+        intellect: stats.intellect.toNumber(),
+    }
+}
+
 export interface AnchorFriendlyBaseAttributes {
     atk: anchor.BN
     def: anchor.BN
     range: anchor.BN
-    mag_atk: anchor.BN
-    mag_def: anchor.BN
+    magAtk: anchor.BN
+    magDef: anchor.BN
     rate: anchor.BN
 }
 
@@ -35,8 +43,8 @@ export interface BaseAttributes {
     atk: number
     def: number
     range: number
-    mag_atk: number
-    mag_def: number
+    magAtk: number
+    magDef: number
     rate: number
 }
 
@@ -47,9 +55,22 @@ export function toAnchorFriendlyBaseAttributes(
         atk: new anchor.BN(attributes.atk),
         def: new anchor.BN(attributes.def),
         range: new anchor.BN(attributes.range),
-        mag_atk: new anchor.BN(attributes.mag_atk),
-        mag_def: new anchor.BN(attributes.mag_def),
+        magAtk: new anchor.BN(attributes.magAtk),
+        magDef: new anchor.BN(attributes.magDef),
         rate: new anchor.BN(attributes.rate),
+    }
+}
+
+export function toNormalBaseAttributes(
+    attributes: AnchorFriendlyBaseAttributes
+): BaseAttributes {
+    return {
+        atk: attributes.atk.toNumber(),
+        def: attributes.atk.toNumber(),
+        range: attributes.range.toNumber(),
+        magAtk: attributes.magAtk.toNumber(),
+        magDef: attributes.magDef.toNumber(),
+        rate: attributes.rate.toNumber(),
     }
 }
 
@@ -59,7 +80,7 @@ export const EmptyAttributes: BaseAttributes = {
     atk: 0,
     def: 0,
     range: 0,
-    mag_atk: 0,
-    mag_def: 0,
+    magAtk: 0,
+    magDef: 0,
     rate: 0,
 }

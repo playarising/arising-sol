@@ -25,7 +25,7 @@ pub struct UpdateForgeRecipe<'info> {
 pub struct AddForgeRecipe<'info> {
     #[account(mut,
         constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority,
-        constraint = config.forge_recipes == id @ ArisingError::InvalidForgeRecipeID
+        constraint = (config.forge_recipes + 1) == id @ ArisingError::InvalidForgeRecipeID
     )]
     payer: Signer<'info>,
 
@@ -62,7 +62,7 @@ pub struct UpdateCraftRecipe<'info> {
 pub struct AddCraftRecipe<'info> {
     #[account(mut,
         constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority,
-        constraint = config.craft_recipes == id @ ArisingError::InvalidCraftRecipeID
+        constraint = (config.craft_recipes + 1) == id @ ArisingError::InvalidCraftRecipeID
     )]
     payer: Signer<'info>,
 
@@ -82,7 +82,7 @@ pub struct AddCraftRecipe<'info> {
 }
 
 enum ResourceType {
-    RAW,
+    RAW = 1,
     BASIC,
     ITEM,
 }
@@ -92,16 +92,16 @@ pub const RECIPE_SIZE: usize =
     8 + // discriminator
     64 + // id
     24 + // name
-    160 + // materials
-    160 + // materials_amounts
-    80 + // materials_types
+    640 + // materials
+    640 + // materials_amounts
+    640 + // materials_types
     BASE_STATS_SIZE + // stats_required
     BASE_STATS_SIZE + // stats_sacrificed
     64 + // cooldown
-    16 + // level_required
-    16 + // item_rewarded
-    16 + // item_rewarded_amount
-    8 + // item_rewarded_type
+    64 + // level_required
+    64 + // item_rewarded
+    64 + // item_rewarded_amount
+    64 + // item_rewarded_type
     1; // available
 
 /// The full metadata information for a recipe.
@@ -109,16 +109,16 @@ pub const RECIPE_SIZE: usize =
 pub struct Recipe {
     pub id: u64,
     pub name: String,
-    pub materials: [u16; 10],
-    pub materials_amounts: [u16; 10],
-    pub materials_types: [u8; 10],
+    pub materials: [u64; 10],
+    pub materials_amounts: [u64; 10],
+    pub materials_types: [u64; 10],
     pub stats_required: BaseStats,
     pub stats_sacrificed: BaseStats,
     pub cooldown: u64,
-    pub level_required: u16,
-    pub item_rewarded: u16,
-    pub item_rewarded_amount: u16,
-    pub item_rewarded_type: u8,
+    pub level_required: u64,
+    pub item_rewarded: u64,
+    pub item_rewarded_amount: u64,
+    pub item_rewarded_type: u64,
     pub available: bool,
 }
 

@@ -7,6 +7,7 @@ import {
     BaseStats,
     EmptyBaseStats,
     toAnchorFriendlyBaseStats,
+    toNormalBaseStats,
 } from './stats'
 import * as anchor from '@project-serum/anchor'
 
@@ -61,8 +62,31 @@ export function toAnchorFriendlyRecipe(recipe: Recipe): AnchorFriendlyRecipe {
     }
 }
 
+export function toNormalRecipe(recipe: AnchorFriendlyRecipe): Recipe {
+    return {
+        id: recipe.id.toNumber(),
+        name: recipe.name,
+        materials: recipe.materials
+            .map((material) => material.toNumber())
+            .filter((material) => material !== 0),
+        materialsAmounts: recipe.materialsAmounts
+            .map((amount) => amount.toNumber())
+            .filter((amount) => amount !== 0),
+        materialsTypes: recipe.materialsTypes
+            .map((type) => type.toNumber())
+            .filter((type) => type !== 0),
+        statsRequired: toNormalBaseStats(recipe.statsRequired),
+        statsSacrificed: toNormalBaseStats(recipe.statsSacrificed),
+        cooldown: recipe.cooldown.toNumber(),
+        levelRequired: recipe.levelRequired.toNumber(),
+        itemRewarded: recipe.itemRewarded.toNumber(),
+        itemRewardedType: recipe.itemRewardedType.toNumber(),
+        itemRewardedAmount: recipe.itemRewardedAmount.toNumber(),
+    }
+}
+
 export enum FORGE_RECIPE {
-    WOOD_PLANK,
+    WOOD_PLANK = 1,
     IRONSTONE,
     WOOL_FABRIC,
     HARDENED_LEATHER,
@@ -80,7 +104,7 @@ export enum FORGE_RECIPE {
 }
 
 export enum CRAFT_RECIPE {
-    BONE_DAGGER,
+    BONE_DAGGER = 1,
     BONE_HAMMER,
     BONE_AXE,
 }

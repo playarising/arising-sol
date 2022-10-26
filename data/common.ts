@@ -1,7 +1,7 @@
 import * as anchor from '@project-serum/anchor'
 
 export enum RESOURCE_TYPE {
-    RAW,
+    RAW = 1,
     BASIC,
     ITEM,
 }

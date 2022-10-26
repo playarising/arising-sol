@@ -13,4 +13,6 @@ pub enum ArisingError {
     InvalidCraftRecipeID,
     #[msg("The ID for the upgrade recipe is invalid")]
     InvalidUpgradeRecipeID,
+    #[msg("The ID for the quest is invalid")]
+    InvalidQuestID,
 }

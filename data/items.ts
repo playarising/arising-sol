@@ -6,13 +6,13 @@ import {
 } from './stats'
 
 export enum ITEM {
-    BONE_DAGGER,
+    BONE_DAGGER = 1,
     BONE_HAMMER,
     BONE_AXE,
 }
 
 export enum ITEM_TYPE {
-    ONE_HANDED,
+    ONE_HANDED = 1,
     TWO_HANDED,
     HELMET,
     SHOULDER_GUARD,
@@ -47,8 +47,8 @@ export const ITEMS: {
                 atk: 1,
                 def: 0,
                 range: 1,
-                mag_atk: 0,
-                mag_def: 0,
+                magAtk: 0,
+                magDef: 0,
                 rate: 1,
             },
         },

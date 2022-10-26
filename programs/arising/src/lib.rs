@@ -4,14 +4,14 @@ mod characters;
 mod errors;
 mod codex;
 mod recipes;
+mod quests;
 
 use anchor_lang::prelude::*;
 
 use config::*;
 use characters::*;
 use recipes::*;
-use errors::*;
-use codex::*;
+use quests::*;
 
 declare_id!("GT1koQQwD6ZV6bxciNSwC3YFDHiByySKZbQ2MQJF4GWp");
 
@@ -66,11 +66,13 @@ pub mod arising {
         recipe.recipe.name = data.name;
         recipe.recipe.materials = data.materials;
         recipe.recipe.materials_amounts = data.materials_amounts;
+        recipe.recipe.materials_types = data.materials_types;
         recipe.recipe.stats_required = data.stats_required;
         recipe.recipe.stats_sacrificed = data.stats_sacrificed;
         recipe.recipe.cooldown = data.cooldown;
         recipe.recipe.level_required = data.level_required;
         recipe.recipe.item_rewarded = data.item_rewarded;
+        recipe.recipe.item_rewarded_type = data.item_rewarded_type;
         recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
         recipe.recipe.available = false;
 
@@ -100,13 +102,14 @@ pub mod arising {
         recipe.recipe.name = data.name;
         recipe.recipe.materials = data.materials;
         recipe.recipe.materials_amounts = data.materials_amounts;
+        recipe.recipe.materials_types = data.materials_types;
         recipe.recipe.stats_required = data.stats_required;
         recipe.recipe.stats_sacrificed = data.stats_sacrificed;
         recipe.recipe.cooldown = data.cooldown;
         recipe.recipe.level_required = data.level_required;
         recipe.recipe.item_rewarded = data.item_rewarded;
+        recipe.recipe.item_rewarded_type = data.item_rewarded_type;
         recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
-        recipe.recipe.available = false;
 
         Ok(())
     }
@@ -133,6 +136,7 @@ pub mod arising {
         recipe.recipe.cooldown = data.cooldown;
         recipe.recipe.level_required = data.level_required;
         recipe.recipe.item_rewarded = data.item_rewarded;
+        recipe.recipe.item_rewarded_type = data.item_rewarded_type;
         recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
         recipe.recipe.available = false;
 
@@ -162,13 +166,72 @@ pub mod arising {
         recipe.recipe.name = data.name;
         recipe.recipe.materials = data.materials;
         recipe.recipe.materials_amounts = data.materials_amounts;
+        recipe.recipe.materials_types = data.materials_types;
         recipe.recipe.stats_required = data.stats_required;
         recipe.recipe.stats_sacrificed = data.stats_sacrificed;
         recipe.recipe.cooldown = data.cooldown;
         recipe.recipe.level_required = data.level_required;
         recipe.recipe.item_rewarded = data.item_rewarded;
+        recipe.recipe.item_rewarded_type = data.item_rewarded_type;
         recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
-        recipe.recipe.available = false;
+
+        Ok(())
+    }
+
+    pub fn add_quest(ctx: Context<AddQuest>, _bump: u8, id: u64, data: Quest) -> Result<()> {
+        let quest = &mut ctx.accounts.quest;
+
+        let config = &mut ctx.accounts.config;
+
+        msg!("Adding quest {} with id {}", data.name, id);
+
+        quest.id = id;
+        quest.name = data.name;
+        quest.description = data.description;
+        quest.quest_type = data.quest_type;
+        quest.stats_required = data.stats_required;
+        quest.cooldown = data.cooldown;
+        quest.level_required = data.level_required;
+        quest.materials_reward = data.materials_reward;
+        quest.materials_amounts = data.materials_amounts;
+        quest.mob_experience = data.mob_experience;
+        quest.mob_level = data.mob_level;
+        quest.mob_base_stats = data.mob_base_stats;
+        quest.mob_base_attributes = data.mob_base_attributes;
+        quest.available = false;
+
+        config.quests += 1;
+
+        Ok(())
+    }
+
+    pub fn update_quest_availability(ctx: Context<UpdateQuest>, available: bool) -> Result<()> {
+        let quest = &mut ctx.accounts.quest;
+
+        msg!("Updating quest id {} availability to {}", quest.id, available);
+
+        quest.available = available;
+
+        Ok(())
+    }
+
+    pub fn update_quest(ctx: Context<UpdateQuest>, data: Quest) -> Result<()> {
+        let quest = &mut ctx.accounts.quest;
+
+        msg!("Updating quest id {}", quest.id);
+
+        quest.name = data.name;
+        quest.description = data.description;
+        quest.quest_type = data.quest_type;
+        quest.stats_required = data.stats_required;
+        quest.cooldown = data.cooldown;
+        quest.level_required = data.level_required;
+        quest.materials_reward = data.materials_reward;
+        quest.materials_amounts = data.materials_amounts;
+        quest.mob_experience = data.mob_experience;
+        quest.mob_level = data.mob_level;
+        quest.mob_base_stats = data.mob_base_stats;
+        quest.mob_base_attributes = data.mob_base_attributes;
 
         Ok(())
     }

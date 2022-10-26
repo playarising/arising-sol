@@ -30,4 +30,5 @@ pub struct Config {
     pub forge_recipes: u64,
     pub craft_recipes: u64,
     pub upgrade_recipes: u64,
+    pub quests: u64,
 }

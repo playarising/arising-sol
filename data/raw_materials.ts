@@ -1,5 +1,5 @@
 export enum RAW_MATERIALS {
-    WOOD,
+    WOOD = 1,
     BONES,
     COPPER,
     BRONZE,
