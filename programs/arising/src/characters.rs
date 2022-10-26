@@ -1,10 +1,17 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token::TokenAccount;
 
 use crate::config::*;
 use crate::errors::*;
 use crate::codex::*;
+use crate::checks::*;
 
 const CHARACTER_PREFIX: &str = "arising_character_account";
+
+#[inline(always)]
+pub fn get_character_assignable_points(character: &Account<Character>) -> u64 {
+    return (6 + character.level).into();
+}
 
 #[derive(Accounts)]
 #[instruction(mint: Pubkey, bump: u8)]
@@ -24,6 +31,21 @@ pub struct AddCharacter<'info> {
         space = CHARACTER_ACCOUNT_SIZE
     )]
     pub character: Account<'info, Character>,
+
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct CharacterAccess<'info> {
+    #[account(mut,
+        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidCharacterOwner)]
+    payer: Signer<'info>,
+
+    #[account(mut)]
+    pub character: Account<'info, Character>,
+
+    #[account(mut)]
+    pub character_token_account: Account<'info, TokenAccount>,
 
     pub system_program: Program<'info, System>,
 }

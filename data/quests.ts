@@ -42,7 +42,7 @@ interface AnchorFriendlyQuest {
     mobBaseAttributes: AnchorFriendlyBaseAttributes
 }
 
-interface QuestData {
+export interface QuestData {
     id: QUESTS
     name: string
     description: string

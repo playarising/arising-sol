@@ -5,6 +5,7 @@ mod errors;
 mod codex;
 mod recipes;
 mod quests;
+mod checks;
 
 use anchor_lang::prelude::*;
 
@@ -12,6 +13,8 @@ use config::*;
 use characters::*;
 use recipes::*;
 use quests::*;
+use codex::*;
+use errors::*;
 
 declare_id!("GT1koQQwD6ZV6bxciNSwC3YFDHiByySKZbQ2MQJF4GWp");
 
@@ -46,6 +49,25 @@ pub mod arising {
     pub fn add_character(ctx: Context<AddCharacter>, mint: Pubkey, _bump: u8) -> Result<()> {
         let character = &mut ctx.accounts.character;
         character.mint = mint;
+
+        Ok(())
+    }
+
+    pub fn assign_stats_character(ctx: Context<CharacterAccess>, points: BaseStats) -> Result<()> {
+        let sum = points.might + points.speed + points.intellect;
+
+        if sum > get_character_assignable_points(&ctx.accounts.character) {
+            return Err(ArisingError::InvalidAssignPoints.into());
+        }
+
+        let character = &mut ctx.accounts.character;
+
+        character.base_stats.might += points.might;
+        character.base_stats.speed += points.speed;
+        character.base_stats.intellect += points.intellect;
+        character.pool_stats.might += points.might;
+        character.pool_stats.speed += points.speed;
+        character.pool_stats.intellect += points.intellect;
 
         Ok(())
     }

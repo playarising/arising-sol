@@ -26,7 +26,7 @@ interface AnchorFriendlyRecipe {
     itemRewardedAmount: anchor.BN
 }
 
-interface Recipe {
+export interface Recipe {
     id: number
     name: string
     materials: number[]

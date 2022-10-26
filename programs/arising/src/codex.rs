@@ -182,9 +182,9 @@ pub const BASE_STATS_SIZE: usize =
 /// The struct for character stats.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct BaseStats {
-    might: u64,
-    speed: u64,
-    intellect: u64,
+    pub might: u64,
+    pub speed: u64,
+    pub intellect: u64,
 }
 
 /// The size of the character attributes.
@@ -199,10 +199,10 @@ pub const BASE_ATTRIBUTES_SIZE: usize =
 /// The struct for character attributes.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct BaseAttributes {
-    atk: u64,
-    def: u64,
-    range: u64,
-    mag_atk: u64,
-    mag_def: u64,
-    rate: u64,
+    pub atk: u64,
+    pub def: u64,
+    pub range: u64,
+    pub mag_atk: u64,
+    pub mag_def: u64,
+    pub rate: u64,
 }

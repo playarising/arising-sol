@@ -15,4 +15,8 @@ pub enum ArisingError {
     InvalidUpgradeRecipeID,
     #[msg("The ID for the quest is invalid")]
     InvalidQuestID,
+    #[msg("Payer is not owner of the requested character")]
+    InvalidCharacterOwner,
+    #[msg("The amount of points you are trying to assign is invalid")]
+    InvalidAssignPoints,
 }

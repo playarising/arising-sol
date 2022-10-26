@@ -5,7 +5,7 @@ use anchor_spl::token::{ TokenAccount };
 pub fn is_mint_owner(
     mint: Pubkey,
     check_owner: Pubkey,
-    owner_token_account: Account<TokenAccount>
+    owner_token_account: &Account<TokenAccount>
 ) -> bool {
     if mint != owner_token_account.mint {
         msg!("is_mint_owner: token mint doesn't match");
