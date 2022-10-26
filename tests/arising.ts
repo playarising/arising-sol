@@ -2,7 +2,6 @@ import * as anchor from '@project-serum/anchor'
 import { Program } from '@project-serum/anchor'
 import { LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { expect } from 'chai'
-import { toAnchorFriendlyID } from '../data/common'
 import {
     QUESTS_DATA,
     toAnchorFriendlyQuest,
@@ -50,8 +49,6 @@ describe('arising', () => {
             signature: airdropSignature,
         })
 
-        const balance = await authority.connection.getBalance(payer.publicKey)
-
         await mockMintNFT(payer, anchor.getProvider(), mint1)
         await mockMintNFT(payer, anchor.getProvider(), mint2)
         await mockMintNFT(payer, anchor.getProvider(), mint3)
@@ -75,9 +72,9 @@ describe('arising', () => {
         )
         expect(config.paused).to.eq(true)
         expect(config.initialized).to.eq(true)
-        expect(config.maxCharacters).to.eq(30_000)
-        expect(config.secondsBetweenRefreshes).to.eq(86_400)
-        expect(config.secondsBetweenPaidRefreshes).to.eq(86_400)
+        expect(config.maxCharacters.toNumber()).to.eq(30_000)
+        expect(config.secondsBetweenRefreshes.toNumber()).to.eq(86_400)
+        expect(config.secondsBetweenPaidRefreshes.toNumber()).to.eq(86_400)
         expect(config.authority.toBase58()).to.eq(
             authority.publicKey.toBase58()
         )
