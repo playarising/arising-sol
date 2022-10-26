@@ -27,7 +27,7 @@ pub struct Config {
     pub seconds_between_paid_refreshes: u32,
     pub max_characters: u32,
     pub experience_multiplier: u8,
-    pub forge_recipes: u16,
-    pub craft_recipes: u16,
-    pub upgrade_recipes: u16,
+    pub forge_recipes: u64,
+    pub craft_recipes: u64,
+    pub upgrade_recipes: u64,
 }

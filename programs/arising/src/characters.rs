@@ -30,14 +30,14 @@ pub struct AddCharacter<'info> {
 
 /// The size of the character struct for actions.
 pub const CHARACTER_SLOT_SIZE: usize =
-    32 + // cooldown
+    64 + // cooldown
     16 + // last_recipe
     1; // last_recipe_claimed
 
 /// The struct for slots used for character actions.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct CharacterSlot {
-    pub cooldown: u32,
+    pub cooldown: u64,
     pub last_recipe: u16,
     pub last_recipe_claimed: bool,
 }

@@ -1,10 +1,18 @@
 import * as anchor from '@project-serum/anchor'
 import { Program } from '@project-serum/anchor'
 import { expect } from 'chai'
+import { toAnchorFriendlyID } from '../data/common'
+import {
+    CRAFT_RECIPES_DATA,
+    FORGE_RECIPES_DATA,
+    toAnchorFriendlyRecipe,
+} from '../data/recipes'
 import { Arising } from '../target/types/arising'
 
 const CONFIG_PREFIX = 'arising_config_account'
 const CHARACTER_PREFIX = 'arising_character_account'
+const FORGE_RECIPE_PREFIX = 'arising_forge_recipe'
+const CRAFT_RECIPE_PREFIX = 'arsing_craft'
 
 describe('arising', () => {
     anchor.setProvider(anchor.AnchorProvider.env())
@@ -148,5 +156,205 @@ describe('arising', () => {
         )
         expect(character3).to.not.be.null
         expect(character3.mint.toString()).to.eq(mint3.publicKey.toString())
+    })
+
+    it('Add forge recipes', async () => {
+        const keys = Object.keys(FORGE_RECIPES_DATA)
+
+        const [config_program_address] =
+            await anchor.web3.PublicKey.findProgramAddress(
+                [Buffer.from(CONFIG_PREFIX), authority.publicKey.toBuffer()],
+                program.programId
+            )
+
+        for (const key of keys) {
+            const recipe = FORGE_RECIPES_DATA[key]
+
+            const [recipe_account, bump] =
+                await anchor.web3.PublicKey.findProgramAddress(
+                    [
+                        Buffer.from(FORGE_RECIPE_PREFIX),
+                        toAnchorFriendlyID(recipe.id),
+                    ],
+                    program.programId
+                )
+
+            const anchorRecipe = toAnchorFriendlyRecipe(recipe)
+
+            await program.methods
+                // @ts-ignore
+                .addForgeRecipe(bump, new anchor.BN(recipe.id), anchorRecipe)
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    forgeRecipe: recipe_account,
+                })
+                .rpc()
+        }
+    })
+
+    it('Add craft recipes', async () => {
+        const keys = Object.keys(CRAFT_RECIPES_DATA)
+
+        const [config_program_address] =
+            await anchor.web3.PublicKey.findProgramAddress(
+                [Buffer.from(CONFIG_PREFIX), authority.publicKey.toBuffer()],
+                program.programId
+            )
+
+        for (const key of keys) {
+            const recipe = CRAFT_RECIPES_DATA[key]
+
+            const [recipe_account, bump] =
+                await anchor.web3.PublicKey.findProgramAddress(
+                    [
+                        Buffer.from(CRAFT_RECIPE_PREFIX),
+                        toAnchorFriendlyID(recipe.id),
+                    ],
+                    program.programId
+                )
+
+            const anchorRecipe = toAnchorFriendlyRecipe(recipe)
+
+            await program.methods
+                // @ts-ignore
+                .addCraftRecipe(bump, new anchor.BN(recipe.id), anchorRecipe)
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    craftRecipe: recipe_account,
+                })
+                .rpc()
+        }
+    })
+
+    it('Fetch all forge recipes modify them and compare', async () => {
+        const keys = Object.keys(FORGE_RECIPES_DATA)
+
+        const [config_program_address] =
+            await anchor.web3.PublicKey.findProgramAddress(
+                [Buffer.from(CONFIG_PREFIX), authority.publicKey.toBuffer()],
+                program.programId
+            )
+
+        for (const key of keys) {
+            const recipe = FORGE_RECIPES_DATA[key]
+
+            const [recipe_account, bump] =
+                await anchor.web3.PublicKey.findProgramAddress(
+                    [
+                        Buffer.from(FORGE_RECIPE_PREFIX),
+                        toAnchorFriendlyID(recipe.id),
+                    ],
+                    program.programId
+                )
+
+            let anchorRecipe = await program.account.forgeRecipe.fetch(
+                recipe_account
+            )
+
+            expect(anchorRecipe.recipe.name).to.eq(recipe.name)
+            expect(anchorRecipe.recipe.available).to.eq(false)
+
+            await program.methods
+                .updateForgeRecipeAvailability(true)
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    forgeRecipe: recipe_account,
+                })
+                .rpc()
+
+            anchorRecipe = await program.account.forgeRecipe.fetch(
+                recipe_account
+            )
+
+            expect(anchorRecipe.recipe.available).to.eq(true)
+
+            const newName = 'New Recipe Name'
+            const anchorNewData = toAnchorFriendlyRecipe(recipe)
+            anchorNewData.name = newName
+
+            await program.methods
+                // @ts-ignore
+                .updateForgeRecipe(anchorNewData)
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    forgeRecipe: recipe_account,
+                })
+                .rpc()
+
+            anchorRecipe = await program.account.forgeRecipe.fetch(
+                recipe_account
+            )
+
+            expect(anchorRecipe.recipe.name).to.eq(newName)
+        }
+    })
+
+    it('Fetch all craft recipes modify them and compare', async () => {
+        const keys = Object.keys(CRAFT_RECIPES_DATA)
+
+        const [config_program_address] =
+            await anchor.web3.PublicKey.findProgramAddress(
+                [Buffer.from(CONFIG_PREFIX), authority.publicKey.toBuffer()],
+                program.programId
+            )
+
+        for (const key of keys) {
+            const recipe = CRAFT_RECIPES_DATA[key]
+
+            const [recipe_account, bump] =
+                await anchor.web3.PublicKey.findProgramAddress(
+                    [
+                        Buffer.from(CRAFT_RECIPE_PREFIX),
+                        toAnchorFriendlyID(recipe.id),
+                    ],
+                    program.programId
+                )
+
+            let anchorRecipe = await program.account.craftRecipe.fetch(
+                recipe_account
+            )
+
+            expect(anchorRecipe.recipe.name).to.eq(recipe.name)
+            expect(anchorRecipe.recipe.available).to.eq(false)
+
+            await program.methods
+                .updateCraftRecipeAvailability(true)
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    craftRecipe: recipe_account,
+                })
+                .rpc()
+
+            anchorRecipe = await program.account.craftRecipe.fetch(
+                recipe_account
+            )
+
+            expect(anchorRecipe.recipe.available).to.eq(true)
+
+            const newName = 'New Recipe Name'
+            const anchorNewData = toAnchorFriendlyRecipe(recipe)
+            anchorNewData.name = newName
+
+            await program.methods
+                // @ts-ignore
+                .updateCraftRecipe(anchorNewData)
+                .accounts({
+                    config: config_program_address,
+                    payer: authority.publicKey,
+                    craftRecipe: recipe_account,
+                })
+                .rpc()
+
+            anchorRecipe = await program.account.craftRecipe.fetch(
+                recipe_account
+            )
+
+            expect(anchorRecipe.recipe.name).to.eq(newName)
+        }
     })
 })
