@@ -1,12 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 
-use crate::config::*;
-use crate::errors::*;
-use crate::codex::*;
-use crate::checks::*;
-use crate::utils::*;
-
 const CHARACTER_NAME_PREFIX: &str = "arising_character_name";
 
 #[derive(Accounts)]

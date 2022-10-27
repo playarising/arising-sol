@@ -5,7 +5,6 @@ use crate::config::*;
 use crate::errors::*;
 use crate::codex::*;
 use crate::characters::*;
-use crate::checks::*;
 use crate::utils::*;
 
 const CRAFT_RECIPE_PREFIX: &str = "arsing_craft";

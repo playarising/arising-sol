@@ -4,10 +4,33 @@ use anchor_spl::token::TokenAccount;
 use crate::config::*;
 use crate::errors::*;
 use crate::codex::*;
-use crate::checks::*;
 use crate::utils::*;
 
 const CHARACTER_PREFIX: &str = "arising_character_account";
+
+#[inline(always)]
+pub fn is_mint_owner(
+    mint: Pubkey,
+    check_owner: Pubkey,
+    owner_token_account: &Account<TokenAccount>
+) -> bool {
+    if mint != owner_token_account.mint {
+        msg!("is_mint_owner: token mint doesn't match");
+        return false;
+    }
+
+    if check_owner != owner_token_account.owner {
+        msg!("is_mint_owner: owner_token_account owner doesn't match");
+        return false;
+    }
+
+    if owner_token_account.amount < 1 {
+        msg!("is_mint_owner: not enough amount of tokens to be owner");
+        return false;
+    }
+
+    return true;
+}
 
 #[inline(always)]
 pub fn refresh(config: &Account<Config>, character: &mut Account<Character>) -> Result<()> {

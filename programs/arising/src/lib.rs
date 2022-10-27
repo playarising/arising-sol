@@ -5,7 +5,6 @@ mod errors;
 mod codex;
 mod recipes;
 mod quests;
-mod checks;
 
 use anchor_lang::prelude::*;
 
