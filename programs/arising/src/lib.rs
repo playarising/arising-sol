@@ -257,6 +257,14 @@ pub mod arising {
 
         Ok(())
     }
+
+    pub fn start_forge(ctx: Context<ForgeAccess>) -> Result<()> {
+        Ok(())
+    }
+
+    pub fn claim_forge(ctx: Context<ForgeAccess>) -> Result<()> {
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]

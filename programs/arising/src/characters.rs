@@ -23,6 +23,24 @@ pub fn refresh(config: &Account<Config>, character: &mut Account<Character>) -> 
 }
 
 #[inline(always)]
+pub fn refresh_with_token(
+    config: &Account<Config>,
+    character: &mut Account<Character>
+) -> Result<()> {
+    if character.last_refresh_with_refresher + config.seconds_between_paid_refreshes < now() {
+        return Err(ArisingError::RefreshNotAvailable.into());
+    }
+
+    character.pool_stats.might = character.base_stats.might;
+    character.pool_stats.speed = character.base_stats.speed;
+    character.pool_stats.intellect = character.base_stats.intellect;
+
+    // TODO burn token.
+
+    return Ok(());
+}
+
+#[inline(always)]
 pub fn get_character_assignable_points(character: &Account<Character>) -> u64 {
     return (6 + character.level).into();
 }

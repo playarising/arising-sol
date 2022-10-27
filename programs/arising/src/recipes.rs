@@ -1,11 +1,81 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token::TokenAccount;
 
 use crate::config::*;
 use crate::errors::*;
 use crate::codex::*;
+use crate::characters::*;
+use crate::checks::*;
+use crate::utils::*;
 
 const CRAFT_RECIPE_PREFIX: &str = "arsing_craft";
 const FORGE_RECIPE_PREFIX: &str = "arising_forge_recipe";
+
+#[inline(always)]
+pub fn is_forge_recipe_available_for_character(
+    recipe: &Account<ForgeRecipe>,
+    character: &Account<Character>
+) -> bool {
+    if !recipe.recipe.available {
+        return false;
+    }
+
+    if character.forge.cooldown == 0 {
+        return true;
+    }
+
+    return character.forge.cooldown <= now() && character.forge.last_recipe_claimed;
+}
+
+#[inline(always)]
+pub fn is_forge_claimable_for_character(character: &Account<Character>) -> bool {
+    return (
+        character.forge.cooldown <= now() &&
+        !character.forge.last_recipe_claimed &&
+        character.forge.last_recipe != 0
+    );
+}
+
+#[inline(always)]
+pub fn is_craft_recipe_available_for_character(
+    recipe: &Account<CraftRecipe>,
+    character: &Account<Character>
+) -> bool {
+    if !recipe.recipe.available {
+        return false;
+    }
+
+    if character.craft.cooldown == 0 {
+        return true;
+    }
+
+    return character.craft.cooldown <= now() && character.craft.last_recipe_claimed;
+}
+
+#[inline(always)]
+pub fn is_craft_claimable_for_character(character: &Account<Character>) -> bool {
+    return (
+        character.craft.cooldown <= now() &&
+        !character.craft.last_recipe_claimed &&
+        character.craft.last_recipe != 0
+    );
+}
+
+#[derive(Accounts)]
+pub struct ForgeAccess<'info> {
+    #[account(mut,
+        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidCharacterOwner)]
+    payer: Signer<'info>,
+
+    #[account(mut)]
+    pub character: Account<'info, Character>,
+
+    #[account(mut)]
+    pub character_token_account: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub forge_recipe: Account<'info, ForgeRecipe>,
+}
 
 #[derive(Accounts)]
 pub struct UpdateForgeRecipe<'info> {
@@ -42,6 +112,22 @@ pub struct AddForgeRecipe<'info> {
     pub forge_recipe: Account<'info, ForgeRecipe>,
 
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct CraftAccess<'info> {
+    #[account(mut,
+        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidCharacterOwner)]
+    payer: Signer<'info>,
+
+    #[account(mut)]
+    pub character: Account<'info, Character>,
+
+    #[account(mut)]
+    pub character_token_account: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub craft_recipe: Account<'info, CraftRecipe>,
 }
 
 #[derive(Accounts)]
