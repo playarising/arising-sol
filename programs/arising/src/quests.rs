@@ -24,7 +24,7 @@ pub struct UpdateQuest<'info> {
 pub struct AddQuest<'info> {
     #[account(mut,
         constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority,
-        constraint = (config.quests + 1) == id @ ArisingError::InvalidQuestID
+        constraint = (config.quests + 1) == id @ QuestError::InvalidID
     )]
     payer: Signer<'info>,
 

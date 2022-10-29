@@ -7,9 +7,9 @@ import {
     ASSOCIATED_TOKEN_PROGRAM_ID,
 } from '@solana/spl-token'
 
-import { toAnchorFriendlyID } from '../data/common'
-import { Recipe } from '../data/recipes'
-import { QuestData } from '../data/quests'
+import { toAnchorFriendlyID } from './common'
+import { Recipe } from './recipes'
+import { QuestData } from './quests'
 
 const CONFIG_PREFIX = 'arising_config_account'
 const CHARACTER_PREFIX = 'arising_character_account'

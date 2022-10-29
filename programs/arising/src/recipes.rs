@@ -15,14 +15,17 @@ pub fn is_forge_recipe_available_for_character(
     recipe: &Account<ForgeRecipe>,
     character: &Account<Character>
 ) -> bool {
+    // Check if the recipe is available
     if !recipe.recipe.available {
         return false;
     }
 
+    // Check if this is the first use of the character forge.
     if character.forge.cooldown == 0 {
         return true;
     }
 
+    // Check if the cooldown has passed and the forge has been claimed.
     return character.forge.cooldown <= now() && character.forge.last_recipe_claimed;
 }
 
@@ -40,14 +43,17 @@ pub fn is_craft_recipe_available_for_character(
     recipe: &Account<CraftRecipe>,
     character: &Account<Character>
 ) -> bool {
+    // Check if the recipe is available
     if !recipe.recipe.available {
         return false;
     }
 
+    // Check if this is the first use of the character craft.
     if character.craft.cooldown == 0 {
         return true;
     }
 
+    // Check if the cooldown has passed and the craft has been claimed.
     return character.craft.cooldown <= now() && character.craft.last_recipe_claimed;
 }
 
@@ -63,7 +69,7 @@ pub fn is_craft_claimable_for_character(character: &Account<Character>) -> bool 
 #[derive(Accounts)]
 pub struct ForgeAccess<'info> {
     #[account(mut,
-        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidCharacterOwner)]
+        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidOwner)]
     payer: Signer<'info>,
 
     #[account(mut)]
@@ -94,7 +100,7 @@ pub struct UpdateForgeRecipe<'info> {
 pub struct AddForgeRecipe<'info> {
     #[account(mut,
         constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority,
-        constraint = (config.forge_recipes + 1) == id @ ArisingError::InvalidForgeRecipeID
+        constraint = (config.forge_recipes + 1) == id @ ForgeError::InvalidID
     )]
     payer: Signer<'info>,
 
@@ -116,7 +122,7 @@ pub struct AddForgeRecipe<'info> {
 #[derive(Accounts)]
 pub struct CraftAccess<'info> {
     #[account(mut,
-        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidCharacterOwner)]
+        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidOwner)]
     payer: Signer<'info>,
 
     #[account(mut)]
@@ -147,7 +153,7 @@ pub struct UpdateCraftRecipe<'info> {
 pub struct AddCraftRecipe<'info> {
     #[account(mut,
         constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority,
-        constraint = (config.craft_recipes + 1) == id @ ArisingError::InvalidCraftRecipeID
+        constraint = (config.craft_recipes + 1) == id @ CraftError::InvalidID
     )]
     payer: Signer<'info>,
 

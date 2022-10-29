@@ -35,7 +35,7 @@ pub fn is_mint_owner(
 #[inline(always)]
 pub fn refresh(config: &Account<Config>, character: &mut Account<Character>) -> Result<()> {
     if character.last_refresh + config.seconds_between_refreshes < now() {
-        return Err(ArisingError::RefreshNotAvailable.into());
+        return Err(CharacterError::RefreshNotAvailable.into());
     }
 
     character.pool_stats.might = character.base_stats.might;
@@ -51,7 +51,7 @@ pub fn refresh_with_token(
     character: &mut Account<Character>
 ) -> Result<()> {
     if character.last_refresh_with_refresher + config.seconds_between_paid_refreshes < now() {
-        return Err(ArisingError::RefreshNotAvailable.into());
+        return Err(CharacterError::RefreshNotAvailable.into());
     }
 
     character.pool_stats.might = character.base_stats.might;
@@ -71,15 +71,15 @@ pub fn get_character_assignable_points(character: &Account<Character>) -> u64 {
 #[inline(always)]
 pub fn consume_points(character: &mut Account<Character>, points: BaseStats) -> Result<()> {
     if character.pool_stats.might < points.might {
-        return Err(ArisingError::NotEnoughPoolPointsToConsume.into());
+        return Err(CharacterError::NotEnoughPoolPointsToConsume.into());
     }
 
     if character.pool_stats.speed < points.speed {
-        return Err(ArisingError::NotEnoughPoolPointsToConsume.into());
+        return Err(CharacterError::NotEnoughPoolPointsToConsume.into());
     }
 
     if character.pool_stats.intellect < points.intellect {
-        return Err(ArisingError::NotEnoughPoolPointsToConsume.into());
+        return Err(CharacterError::NotEnoughPoolPointsToConsume.into());
     }
 
     character.pool_stats.might -= points.might;
@@ -92,15 +92,15 @@ pub fn consume_points(character: &mut Account<Character>, points: BaseStats) -> 
 #[inline(always)]
 pub fn sacrifice_points(character: &mut Account<Character>, points: BaseStats) -> Result<()> {
     if character.base_stats.might < points.might {
-        return Err(ArisingError::NotEnoughBasePointsToSacrifice.into());
+        return Err(CharacterError::NotEnoughBasePointsToSacrifice.into());
     }
 
     if character.base_stats.speed < points.speed {
-        return Err(ArisingError::NotEnoughBasePointsToSacrifice.into());
+        return Err(CharacterError::NotEnoughBasePointsToSacrifice.into());
     }
 
     if character.base_stats.intellect < points.intellect {
-        return Err(ArisingError::NotEnoughBasePointsToSacrifice.into());
+        return Err(CharacterError::NotEnoughBasePointsToSacrifice.into());
     }
 
     character.base_stats.might -= points.might;
@@ -139,7 +139,7 @@ pub struct AddCharacter<'info> {
 #[derive(Accounts)]
 pub struct CharacterAccess<'info> {
     #[account(mut,
-        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidCharacterOwner)]
+        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidOwner)]
     payer: Signer<'info>,
 
     #[account(mut)]

@@ -22,7 +22,7 @@ import {
     getProgramForgeRecipeAccount,
     getProgramQuestAccount,
     getTokenWalletAccount,
-} from './accounts'
+} from '../data/accounts'
 import { mockMintNFT } from './utils'
 
 describe('arising', () => {

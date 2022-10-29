@@ -1,28 +1,54 @@
 use anchor_lang::prelude::*;
 
-/// Program error codes.
+/// Character context errors
+#[error_code]
+pub enum CharacterError {
+    #[msg("Character: not enough level to perform this actions.")]
+    NotEnoughLevel,
+    #[msg("Character: not enough pool points to consume.")]
+    NotEnoughPoolPointsToConsume,
+    #[msg("Character: not enough base points to sacrifice.")]
+    NotEnoughBasePointsToSacrifice,
+    #[msg("Character: not enough points available to assign.")]
+    NotEnoughAssignablePoints,
+    #[msg("Character: not able to refresh currently.")]
+    RefreshNotAvailable,
+    #[msg("Character: character not able to forge a recipe now.")]
+    NotAbleToForgeRecipe,
+}
+
+/// Forge context errors
+#[error_code]
+pub enum ForgeError {
+    #[msg("Forge: recipe is not available.")]
+    NotAvailable,
+    #[msg("Forge: invalid forge recipe ID.")]
+    InvalidID,
+}
+
+/// Craft context errors
+#[error_code]
+pub enum CraftError {
+    #[msg("Craft: recipe is not available.")]
+    NotAvailable,
+    #[msg("Craft: invalid craft recipe ID.")]
+    InvalidID,
+}
+
+/// Quest context errors
+#[error_code]
+pub enum QuestError {
+    #[msg("Quest: quest is not available.")]
+    NotAvailable,
+    #[msg("Quest: invalid quest ID.")]
+    InvalidID,
+}
+
+/// Program context errors.
 #[error_code]
 pub enum ArisingError {
-    #[msg("Authority is not the program authority.")]
+    #[msg("Arising: authority is not the program authority.")]
     InvalidAuthority,
-    #[msg("Payer is not owner of the token.")]
+    #[msg("Arising: payer is not owner of the token.")]
     InvalidOwner,
-    #[msg("The ID for the forge recipe is invalid")]
-    InvalidForgeRecipeID,
-    #[msg("The ID for the craft recipe is invalid")]
-    InvalidCraftRecipeID,
-    #[msg("The ID for the upgrade recipe is invalid")]
-    InvalidUpgradeRecipeID,
-    #[msg("The ID for the quest is invalid")]
-    InvalidQuestID,
-    #[msg("Payer is not owner of the requested character")]
-    InvalidCharacterOwner,
-    #[msg("The amount of points you are trying to assign is invalid")]
-    InvalidAssignPoints,
-    #[msg("Not enough pool points to consume")]
-    NotEnoughPoolPointsToConsume,
-    #[msg("Not enough base points to sacrifice")]
-    NotEnoughBasePointsToSacrifice,
-    #[msg("Character is not able to do a refresh now")]
-    RefreshNotAvailable,
 }

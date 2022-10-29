@@ -56,7 +56,7 @@ pub mod arising {
         let sum = points.might + points.speed + points.intellect;
 
         if sum > get_character_assignable_points(&ctx.accounts.character) {
-            return Err(ArisingError::InvalidAssignPoints.into());
+            return Err(CharacterError::NotEnoughAssignablePoints.into());
         }
 
         let character = &mut ctx.accounts.character;
@@ -258,6 +258,18 @@ pub mod arising {
     }
 
     pub fn start_forge(ctx: Context<ForgeAccess>) -> Result<()> {
+        let recipe = &ctx.accounts.forge_recipe;
+        let character = &ctx.accounts.character;
+
+        // Check if the character is able to forge
+        if !is_forge_recipe_available_for_character(recipe, character) {
+            return Err(CharacterError::NotAbleToForgeRecipe.into());
+        }
+
+        // Check if the character has enough level for the recipe
+        //if recipe.level_required > character.level {
+        // }
+
         Ok(())
     }
 

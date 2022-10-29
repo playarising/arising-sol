@@ -7,7 +7,7 @@ const CHARACTER_NAME_PREFIX: &str = "arising_character_name";
 #[instruction(mint: Pubkey, bump: u8)]
 pub struct CreateName<'info> {
     #[account(mut,
-        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidCharacterOwner)]
+        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidOwner)]
     payer: Signer<'info>,
 
     #[account(mut)]

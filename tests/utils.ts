@@ -16,7 +16,7 @@ import {
     TransactionMessage,
 } from '@solana/web3.js'
 
-import { getTokenWalletAccount } from './accounts'
+import { getTokenWalletAccount } from '../data/accounts'
 
 // Helper function to mock a NFT mint.
 // Creates an associated account with balance of 1 to the provider
