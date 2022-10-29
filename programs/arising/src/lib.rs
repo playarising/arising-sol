@@ -54,20 +54,20 @@ pub mod arising {
     }
 
     pub fn assign_stats_character(ctx: Context<CharacterAccess>, points: BaseStats) -> Result<()> {
-        let sum = points.might + points.speed + points.intellect;
+        let character = &ctx.accounts.character;
 
-        if sum > get_character_assignable_points(&ctx.accounts.character) {
+        if !can_assign_points(character, &points) {
             return Err(CharacterError::NotEnoughAssignablePoints.into());
         }
 
-        let character = &mut ctx.accounts.character;
+        let mut_character = &mut ctx.accounts.character;
 
-        character.base_stats.might += points.might;
-        character.base_stats.speed += points.speed;
-        character.base_stats.intellect += points.intellect;
-        character.pool_stats.might += points.might;
-        character.pool_stats.speed += points.speed;
-        character.pool_stats.intellect += points.intellect;
+        mut_character.base_stats.might += points.might;
+        mut_character.base_stats.speed += points.speed;
+        mut_character.base_stats.intellect += points.intellect;
+        mut_character.pool_stats.might += points.might;
+        mut_character.pool_stats.speed += points.speed;
+        mut_character.pool_stats.intellect += points.intellect;
 
         Ok(())
     }
@@ -259,29 +259,46 @@ pub mod arising {
     }
 
     pub fn perform_refresh(ctx: Context<CharacterAccessWithConfig>) -> Result<()> {
-        let character = &mut ctx.accounts.character;
+        let character = &ctx.accounts.character;
         let config = &ctx.accounts.config;
 
-        refresh(config, character);
+        if !can_refresh(config, character) {
+            return Err(CharacterError::RefreshNotAvailable.into());
+        }
 
-        Ok(())
+        let mut_character = &mut ctx.accounts.character;
+
+        refresh(mut_character);
+
+        return Ok(());
     }
 
     pub fn perform_refresh_with_token(ctx: Context<CharacterAccessWithConfig>) -> Result<()> {
-        let character = &mut ctx.accounts.character;
+        let character = &ctx.accounts.character;
         let config = &ctx.accounts.config;
 
-        refresh_with_token(config, character);
+        if !can_refresh_with_token(config, character) {
+            return Err(CharacterError::RefreshNotAvailable.into());
+        }
 
-        Ok(())
+        let mut_character = &mut ctx.accounts.character;
+
+        refresh_with_token(mut_character);
+
+        return Ok(());
     }
 
     pub fn start_forge(ctx: Context<ForgeAccess>) -> Result<()> {
         let recipe = &ctx.accounts.forge_recipe;
         let character = &ctx.accounts.character;
 
+        // Check if the forge recipe is available globally.
+        if !is_forge_recipe_available(recipe) {
+            return Err(ForgeError::NotAvailable.into());
+        }
+
         // Check if the character is able to forge
-        if !is_forge_recipe_available_for_character(recipe, character).unwrap() {
+        if !is_forge_available_for_character(character) {
             return Err(CharacterError::NotAbleToForgeRecipe.into());
         }
 
@@ -290,12 +307,29 @@ pub mod arising {
             return Err(CharacterError::NotEnoughLevel.into());
         }
 
+        // Check if the character can consume points of the pool
+        if !can_consume(character, &recipe.recipe.stats_required) {
+            return Err(CharacterError::NotEnoughPoolPointsToConsume.into());
+        }
+
+        let materials = &recipe.recipe.materials;
+        let amounts = &recipe.recipe.materials_amounts;
+        let types = &recipe.recipe.materials_types;
+
+        // Check if the character can consume the materials for the recipe
+        if !has_enough_materials(character, materials, amounts, types) {
+            return Err(CharacterError::NotEnoughResources.into());
+        }
+
         let mut_character = &mut ctx.accounts.character;
 
-        // Consume required pool points
-        consume_points(mut_character, &recipe.recipe.stats_required);
+        // Consume the recipe material
+        consume_materials(mut_character, materials, amounts, types);
 
-        // Consume the character material
+        let stats = &recipe.recipe.stats_required;
+
+        // Consume the pool points
+        consume_points(mut_character, stats);
 
         // Store the recipe information for claim later
         mut_character.forge.cooldown = now() + recipe.recipe.cooldown;
@@ -306,12 +340,11 @@ pub mod arising {
     }
 
     pub fn claim_forge(ctx: Context<ForgeAccess>) -> Result<()> {
-        let recipe = &ctx.accounts.forge_recipe;
         let character = &ctx.accounts.character;
 
         // Check if the character is able to claim the forge recipe
-        if !is_forge_claimable_for_character(recipe, character) {
-            return Err(CharacterError::NotAbleToForgeRecipe.into());
+        if !is_forge_claimable_for_character(character) {
+            return Err(CharacterError::NotAbleToClaimForgeRecipe.into());
         }
 
         // Reward the character
@@ -319,6 +352,74 @@ pub mod arising {
         // Modify the character forge slot to be able to create another recipe
         let mut_character = &mut ctx.accounts.character;
         mut_character.forge.last_recipe_claimed = true;
+
+        Ok(())
+    }
+
+    pub fn start_craft(ctx: Context<CraftAccess>) -> Result<()> {
+        let recipe = &ctx.accounts.craft_recipe;
+        let character = &ctx.accounts.character;
+
+        // Check if the craft recipe is available globally.
+        if !is_craft_recipe_available(recipe) {
+            return Err(CraftError::NotAvailable.into());
+        }
+
+        // Check if the character is able to craft
+        if !is_craft_available_for_character(character) {
+            return Err(CharacterError::NotAbleToCraftRecipe.into());
+        }
+
+        // Check if the character has enough level for the recipe
+        if recipe.recipe.level_required > character.level {
+            return Err(CharacterError::NotEnoughLevel.into());
+        }
+
+        // Check if the character can consume points of the pool
+        if !can_consume(character, &recipe.recipe.stats_required) {
+            return Err(CharacterError::NotEnoughPoolPointsToConsume.into());
+        }
+
+        let materials = &recipe.recipe.materials;
+        let amounts = &recipe.recipe.materials_amounts;
+        let types = &recipe.recipe.materials_types;
+
+        // Check if the character can consume the materials for the recipe
+        if !has_enough_materials(character, materials, amounts, types) {
+            return Err(CharacterError::NotEnoughResources.into());
+        }
+
+        let mut_character = &mut ctx.accounts.character;
+
+        // Consume the recipe material
+        consume_materials(mut_character, materials, amounts, types);
+
+        let stats = &recipe.recipe.stats_required;
+
+        // Consume the pool points
+        consume_points(mut_character, stats);
+
+        // Store the recipe information for claim later
+        mut_character.craft.cooldown = now() + recipe.recipe.cooldown;
+        mut_character.craft.last_recipe = recipe.recipe.id;
+        mut_character.craft.last_recipe_claimed = false;
+
+        Ok(())
+    }
+
+    pub fn claim_craft(ctx: Context<CraftAccess>) -> Result<()> {
+        let character = &ctx.accounts.character;
+
+        // Check if the character is able to claim the craft recipe
+        if !is_craft_claimable_for_character(character) {
+            return Err(CharacterError::NotAbleToClaimCraftRecipe.into());
+        }
+
+        // Reward the character and create an item
+
+        // Modify the character craft slot to be able to create another recipe
+        let mut_character = &mut ctx.accounts.character;
+        mut_character.craft.last_recipe_claimed = true;
 
         Ok(())
     }

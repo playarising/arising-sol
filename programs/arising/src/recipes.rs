@@ -11,22 +11,20 @@ const CRAFT_RECIPE_PREFIX: &str = "arsing_craft";
 const FORGE_RECIPE_PREFIX: &str = "arising_forge_recipe";
 
 #[inline(always)]
-pub fn is_forge_recipe_available_for_character(
-    recipe: &Account<ForgeRecipe>,
-    character: &Account<Character>
-) -> Result<bool> {
-    // Check if the recipe is available
-    if !recipe.recipe.available {
-        return Err(ForgeError::NotAvailable.into());
-    }
+pub fn is_forge_recipe_available(recipe: &Account<ForgeRecipe>) -> bool {
+    // Check if the forge recipe is available globaly.
+    return recipe.recipe.available;
+}
 
+#[inline(always)]
+pub fn is_forge_available_for_character(character: &Account<Character>) -> bool {
     // Check if this is the first use of the character forge.
     if character.forge.cooldown == 0 {
-        return Ok(true);
+        return true;
     }
 
     // Check if the cooldown has passed and the forge has been claimed.
-    return Ok(character.forge.cooldown <= now() && character.forge.last_recipe_claimed);
+    return character.forge.cooldown <= now() && character.forge.last_recipe_claimed;
 }
 
 #[inline(always)]
@@ -39,22 +37,20 @@ pub fn is_forge_claimable_for_character(character: &Account<Character>) -> bool 
 }
 
 #[inline(always)]
-pub fn is_craft_recipe_available_for_character(
-    recipe: &Account<CraftRecipe>,
-    character: &Account<Character>
-) -> Result<bool> {
-    // Check if the recipe is available
-    if !recipe.recipe.available {
-        return Err(CraftError::NotAvailable.into());
-    }
+pub fn is_craft_recipe_available(recipe: &Account<CraftRecipe>) -> bool {
+    // Check if the recipe is available globally
+    return recipe.recipe.available;
+}
 
+#[inline(always)]
+pub fn is_craft_available_for_character(character: &Account<Character>) -> bool {
     // Check if this is the first use of the character craft.
     if character.craft.cooldown == 0 {
-        return Ok(true);
+        return true;
     }
 
     // Check if the cooldown has passed and the craft has been claimed.
-    return Ok(character.craft.cooldown <= now() && character.craft.last_recipe_claimed);
+    return character.craft.cooldown <= now() && character.craft.last_recipe_claimed;
 }
 
 #[inline(always)]
@@ -64,6 +60,116 @@ pub fn is_craft_claimable_for_character(character: &Account<Character>) -> bool 
         !character.craft.last_recipe_claimed &&
         character.craft.last_recipe != 0
     );
+}
+
+#[inline(always)]
+pub fn consume_materials(
+    character: &mut Account<Character>,
+    materials: &[u64; 10],
+    amounts: &[u64; 10],
+    types: &[u64; 10]
+) {
+    let mut i: usize = 0;
+    while i < 10 {
+        let material = materials[i];
+        let amount = amounts[i];
+        let material_type = types[i];
+
+        if material == 0 {
+            continue;
+        }
+
+        if material_type == (ResourceType::Basic as u64) {
+            consume_basic_material(character, material, amount);
+        }
+
+        if material_type == (ResourceType::Raw as u64) {
+            consume_raw_material(character, material, amount);
+        }
+
+        i += 1;
+    }
+}
+
+#[inline(always)]
+pub fn has_enough_materials(
+    character: &Account<Character>,
+    materials: &[u64; 10],
+    amounts: &[u64; 10],
+    types: &[u64; 10]
+) -> bool {
+    let mut i: usize = 0;
+    while i < 10 {
+        let material = materials[i];
+        let amount_required = amounts[i];
+        let material_type = types[i];
+
+        let amount = get_material_amount(character, material, material_type);
+
+        if amount_required > amount {
+            return false;
+        }
+
+        i += 1;
+    }
+
+    return true;
+}
+
+#[inline(always)]
+pub fn consume_raw_material(character: &mut Account<Character>, material: u64, amount: u64) {
+    if material > 16 {
+        return;
+    }
+
+    character.raw_materials[(material as usize) - 1] -= amount;
+
+    return;
+}
+
+#[inline(always)]
+pub fn consume_basic_material(character: &mut Account<Character>, material: u64, amount: u64) {
+    if material > 15 {
+        return;
+    }
+    character.basic_materials[(material as usize) - 1] -= amount;
+
+    return;
+}
+
+#[inline(always)]
+pub fn get_material_amount(
+    character: &Account<Character>,
+    material: u64,
+    material_type: u64
+) -> u64 {
+    if material_type == (ResourceType::Basic as u64) {
+        return get_basic_material_amount(character, material);
+    }
+
+    if material_type == (ResourceType::Raw as u64) {
+        return get_raw_material_amount(character, material);
+    }
+
+    return 0;
+}
+
+#[inline(always)]
+pub fn get_raw_material_amount(character: &Account<Character>, material: u64) -> u64 {
+    if material > 16 {
+        return 0;
+    }
+
+    return character.raw_materials[(material as usize) - 1];
+}
+
+#[inline(always)]
+pub fn get_basic_material_amount(character: &Account<Character>, material: u64) -> u64 {
+    if material > 15 {
+        return 0;
+    }
+
+    return character.basic_materials[(material as usize) - 1];
 }
 
 #[derive(Accounts)]
@@ -173,10 +279,46 @@ pub struct AddCraftRecipe<'info> {
 }
 
 enum ResourceType {
-    RAW = 1,
-    BASIC,
-    ITEM,
+    Raw = 1,
+    Basic,
 }
+
+/* enum BasicMaterials {
+    WoodPlank = 1,
+    Ironstone,
+    WoolFabric,
+    HardenedLeather,
+    CottonFabric,
+    SilkFabric,
+    CopperBar,
+    BronzeBar,
+    IronBar,
+    SilverBar,
+    GoldBar,
+    SteelBar,
+    CobaltBar,
+    PlatinumBar,
+    AdamantineBar,
+}
+
+enum RawMaterials {
+    Wood = 1,
+    Bones,
+    Copper,
+    Bronze,
+    Stone,
+    Iron,
+    Leather,
+    Cotton,
+    Wool,
+    Silk,
+    Silver,
+    Gold,
+    Coal,
+    Cobalt,
+    Platinum,
+    Adamantine,
+} */
 
 /// The size of a craft and forge recipe.
 pub const RECIPE_SIZE: usize =
