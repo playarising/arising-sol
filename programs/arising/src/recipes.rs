@@ -11,8 +11,8 @@ const CRAFT_RECIPE_PREFIX: &str = "arsing_craft";
 const FORGE_RECIPE_PREFIX: &str = "arising_forge_recipe";
 
 #[inline(always)]
+// Check if the forge recipe is available globaly.
 pub fn is_forge_recipe_available(recipe: &Account<ForgeRecipe>) -> bool {
-    // Check if the forge recipe is available globaly.
     return recipe.recipe.available;
 }
 
@@ -37,8 +37,8 @@ pub fn is_forge_claimable_for_character(character: &Account<Character>) -> bool 
 }
 
 #[inline(always)]
+// Check if the recipe is available globally
 pub fn is_craft_recipe_available(recipe: &Account<CraftRecipe>) -> bool {
-    // Check if the recipe is available globally
     return recipe.recipe.available;
 }
 
@@ -282,43 +282,6 @@ enum ResourceType {
     Raw = 1,
     Basic,
 }
-
-/* enum BasicMaterials {
-    WoodPlank = 1,
-    Ironstone,
-    WoolFabric,
-    HardenedLeather,
-    CottonFabric,
-    SilkFabric,
-    CopperBar,
-    BronzeBar,
-    IronBar,
-    SilverBar,
-    GoldBar,
-    SteelBar,
-    CobaltBar,
-    PlatinumBar,
-    AdamantineBar,
-}
-
-enum RawMaterials {
-    Wood = 1,
-    Bones,
-    Copper,
-    Bronze,
-    Stone,
-    Iron,
-    Leather,
-    Cotton,
-    Wool,
-    Silk,
-    Silver,
-    Gold,
-    Coal,
-    Cobalt,
-    Platinum,
-    Adamantine,
-} */
 
 /// The size of a craft and forge recipe.
 pub const RECIPE_SIZE: usize =
