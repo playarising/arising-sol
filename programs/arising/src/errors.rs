@@ -15,6 +15,8 @@ pub enum CharacterError {
     RefreshNotAvailable,
     #[msg("Character: character not able to forge a recipe now.")]
     NotAbleToForgeRecipe,
+    #[msg("Character: character not able to claim the forge recipe now.")]
+    NotAbleToClaimForgeRecipe,
 }
 
 /// Forge context errors

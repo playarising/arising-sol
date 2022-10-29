@@ -56,7 +56,7 @@ describe('arising', () => {
 
     it('Initialize', async () => {
         const { account: config_program_address, bump } =
-            await getProgramConfigAccount(authority, program)
+            await getProgramConfigAccount(authority.publicKey, program)
 
         await program.methods
             .initialize(bump)
@@ -82,7 +82,7 @@ describe('arising', () => {
 
     it('Pause and resume correctly', async () => {
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority, program)
+            await getProgramConfigAccount(authority.publicKey, program)
 
         await program.methods
             .setPaused(false)
@@ -113,7 +113,7 @@ describe('arising', () => {
 
     it('Add a fake mint and fetch the information', async () => {
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority, program)
+            await getProgramConfigAccount(authority.publicKey, program)
 
         const { account: mint1_address, bump: bump1 } =
             await getProgramCharacterAccount(mint1.publicKey, program)
@@ -249,7 +249,7 @@ describe('arising', () => {
         const keys = Object.keys(FORGE_RECIPES_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority, program)
+            await getProgramConfigAccount(authority.publicKey, program)
 
         for (const key of keys) {
             const recipe = FORGE_RECIPES_DATA[key]
@@ -275,7 +275,7 @@ describe('arising', () => {
         const keys = Object.keys(CRAFT_RECIPES_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority, program)
+            await getProgramConfigAccount(authority.publicKey, program)
 
         for (const key of keys) {
             const recipe = CRAFT_RECIPES_DATA[key]
@@ -301,7 +301,7 @@ describe('arising', () => {
         const keys = Object.keys(QUESTS_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority, program)
+            await getProgramConfigAccount(authority.publicKey, program)
 
         for (const key of keys) {
             const quest = QUESTS_DATA[key]
@@ -327,7 +327,7 @@ describe('arising', () => {
         const keys = Object.keys(FORGE_RECIPES_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority, program)
+            await getProgramConfigAccount(authority.publicKey, program)
 
         for (const key of keys) {
             const recipe = FORGE_RECIPES_DATA[key]
@@ -395,7 +395,7 @@ describe('arising', () => {
         const keys = Object.keys(CRAFT_RECIPES_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority, program)
+            await getProgramConfigAccount(authority.publicKey, program)
 
         for (const key of keys) {
             const recipe = CRAFT_RECIPES_DATA[key]
@@ -463,7 +463,7 @@ describe('arising', () => {
         const keys = Object.keys(QUESTS_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority, program)
+            await getProgramConfigAccount(authority.publicKey, program)
 
         for (const key of keys) {
             const quest = QUESTS_DATA[key]

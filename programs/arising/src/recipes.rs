@@ -14,19 +14,19 @@ const FORGE_RECIPE_PREFIX: &str = "arising_forge_recipe";
 pub fn is_forge_recipe_available_for_character(
     recipe: &Account<ForgeRecipe>,
     character: &Account<Character>
-) -> bool {
+) -> Result<bool> {
     // Check if the recipe is available
     if !recipe.recipe.available {
-        return false;
+        return Err(ForgeError::NotAvailable.into());
     }
 
     // Check if this is the first use of the character forge.
     if character.forge.cooldown == 0 {
-        return true;
+        return Ok(true);
     }
 
     // Check if the cooldown has passed and the forge has been claimed.
-    return character.forge.cooldown <= now() && character.forge.last_recipe_claimed;
+    return Ok(character.forge.cooldown <= now() && character.forge.last_recipe_claimed);
 }
 
 #[inline(always)]
@@ -42,19 +42,19 @@ pub fn is_forge_claimable_for_character(character: &Account<Character>) -> bool 
 pub fn is_craft_recipe_available_for_character(
     recipe: &Account<CraftRecipe>,
     character: &Account<Character>
-) -> bool {
+) -> Result<bool> {
     // Check if the recipe is available
     if !recipe.recipe.available {
-        return false;
+        return Err(CraftError::NotAvailable.into());
     }
 
     // Check if this is the first use of the character craft.
     if character.craft.cooldown == 0 {
-        return true;
+        return Ok(true);
     }
 
     // Check if the cooldown has passed and the craft has been claimed.
-    return character.craft.cooldown <= now() && character.craft.last_recipe_claimed;
+    return Ok(character.craft.cooldown <= now() && character.craft.last_recipe_claimed);
 }
 
 #[inline(always)]

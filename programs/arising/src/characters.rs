@@ -68,8 +68,7 @@ pub fn get_character_assignable_points(character: &Account<Character>) -> u64 {
     return (6 + character.level).into();
 }
 
-#[inline(always)]
-pub fn consume_points(character: &mut Account<Character>, points: BaseStats) -> Result<()> {
+pub fn consume_points(character: &mut Account<Character>, points: &BaseStats) -> Result<()> {
     if character.pool_stats.might < points.might {
         return Err(CharacterError::NotEnoughPoolPointsToConsume.into());
     }
@@ -151,6 +150,24 @@ pub struct CharacterAccess<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+pub struct CharacterAccessWithConfig<'info> {
+    #[account(mut,
+        constraint = is_mint_owner(character.mint, payer.key(), &character_token_account) @ ArisingError::InvalidOwner)]
+    payer: Signer<'info>,
+
+    #[account(mut)]
+    pub character: Account<'info, Character>,
+
+    #[account(mut)]
+    pub config: Account<'info, Config>,
+
+    #[account(mut)]
+    pub character_token_account: Account<'info, TokenAccount>,
+
+    pub system_program: Program<'info, System>,
+}
+
 /// The size of the character struct for actions.
 pub const CHARACTER_SLOT_SIZE: usize =
     64 + // cooldown
@@ -211,6 +228,84 @@ pub struct CharacterEquipment {
     pub right_hand: EquipmentSlot,
 }
 
+/// The size of the character raw materials data in bytes.
+pub const CHARACTER_RAW_MATERIALS_SIZE: usize =
+    64 + // wood
+    64 + // bones
+    64 + // copper
+    64 + // bronze
+    64 + // stone
+    64 + // iron
+    64 + // leather
+    64 + // cotton
+    64 + // wool
+    64 + // silk
+    64 + // silver
+    64 + // gold
+    64 + // coal
+    64 + // cobalt
+    64 + // platinum
+    64; // adamantine
+
+/// The character raw materials struct.
+#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+pub struct CharacterRawMaterials {
+    pub wood: u64,
+    pub bones: u64,
+    pub copper: u64,
+    pub bronze: u64,
+    pub stone: u64,
+    pub iron: u64,
+    pub leather: u64,
+    pub cotton: u64,
+    pub wool: u64,
+    pub silk: u64,
+    pub silver: u64,
+    pub gold: u64,
+    pub coal: u64,
+    pub cobalt: u64,
+    pub platinum: u64,
+    pub adamantine: u64,
+}
+
+/// The size of the character basic materials data in bytes.
+pub const CHARACTER_BASIC_MATERIALS_SIZE: usize =
+    64 + // wood_plank
+    64 + // ironstone
+    64 + // wool_fabric
+    64 + // hardened_leader
+    64 + // cotton_fabric
+    64 + // silk_fabric
+    64 + // copper_bar
+    64 + // bronze_bar
+    64 + // iron_bar
+    64 + // silver_bar
+    64 + // gold_bar
+    64 + // steel_bar
+    64 + // cobalt_bar
+    64 + // platinum_bar
+    64; // adamantine_bar
+
+/// The character basic materials struct.
+#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+pub struct CharacterBasicMaterials {
+    pub wood_plank: u64,
+    pub ironstone: u64,
+    pub wool_fabric: u64,
+    pub hardened_leader: u64,
+    pub cotton_fabric: u64,
+    pub silk_fabric: u64,
+    pub copper_bar: u64,
+    pub bronze_bar: u64,
+    pub iron_bar: u64,
+    pub silver_bar: u64,
+    pub gold_bar: u64,
+    pub steel_bar: u64,
+    pub cobalt_bar: u64,
+    pub platinum_bar: u64,
+    pub adamantine_bar: u64,
+}
+
 /// The size of the character metadata in bytes.
 pub const CHARACTER_ACCOUNT_SIZE: usize =
     8 + // discriminator
@@ -225,7 +320,9 @@ pub const CHARACTER_ACCOUNT_SIZE: usize =
     CHARACTER_SLOT_SIZE + // forge
     CHARACTER_SLOT_SIZE + // craft
     CHARACTER_SLOT_SIZE + // craft_upgrades
-    CHARACTER_EQUIPMENT_SIZE; // equipment
+    CHARACTER_EQUIPMENT_SIZE + // equipment
+    CHARACTER_RAW_MATERIALS_SIZE + // raw_materials
+    CHARACTER_BASIC_MATERIALS_SIZE; // basic_materials
 
 /// The full metadata information for an Arising character.
 #[account]
@@ -242,4 +339,6 @@ pub struct Character {
     pub craft: CharacterSlot,
     pub upgrade: CharacterSlot,
     pub equipment: CharacterEquipment,
+    pub raw_materials: CharacterRawMaterials,
+    pub basic_materials: CharacterBasicMaterials,
 }

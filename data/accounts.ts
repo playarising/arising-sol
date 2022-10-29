@@ -24,11 +24,11 @@ export const TOKEN_METADATA_PROGRAM_ID = new PublicKey(TOKEN_METADATA_PROGRAM)
 
 // Returns the program main config account
 export const getProgramConfigAccount = async (
-    authority: Provider,
+    authority: PublicKey,
     program: Program<Arising>
 ): Promise<{ account: PublicKey; bump: number }> => {
     const [account, bump] = await PublicKey.findProgramAddress(
-        [Buffer.from(CONFIG_PREFIX), authority.publicKey.toBuffer()],
+        [Buffer.from(CONFIG_PREFIX), authority.toBuffer()],
         program.programId
     )
 

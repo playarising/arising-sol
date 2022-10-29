@@ -14,6 +14,7 @@ use recipes::*;
 use quests::*;
 use codex::*;
 use errors::*;
+use utils::*;
 
 declare_id!("GT1koQQwD6ZV6bxciNSwC3YFDHiByySKZbQ2MQJF4GWp");
 
@@ -257,23 +258,68 @@ pub mod arising {
         Ok(())
     }
 
+    pub fn perform_refresh(ctx: Context<CharacterAccessWithConfig>) -> Result<()> {
+        let character = &mut ctx.accounts.character;
+        let config = &ctx.accounts.config;
+
+        refresh(config, character);
+
+        Ok(())
+    }
+
+    pub fn perform_refresh_with_token(ctx: Context<CharacterAccessWithConfig>) -> Result<()> {
+        let character = &mut ctx.accounts.character;
+        let config = &ctx.accounts.config;
+
+        refresh_with_token(config, character);
+
+        Ok(())
+    }
+
     pub fn start_forge(ctx: Context<ForgeAccess>) -> Result<()> {
         let recipe = &ctx.accounts.forge_recipe;
         let character = &ctx.accounts.character;
 
         // Check if the character is able to forge
-        if !is_forge_recipe_available_for_character(recipe, character) {
+        if !is_forge_recipe_available_for_character(recipe, character).unwrap() {
             return Err(CharacterError::NotAbleToForgeRecipe.into());
         }
 
         // Check if the character has enough level for the recipe
-        //if recipe.level_required > character.level {
-        // }
+        if recipe.recipe.level_required > character.level {
+            return Err(CharacterError::NotEnoughLevel.into());
+        }
+
+        let mut_character = &mut ctx.accounts.character;
+
+        // Consume required pool points
+        consume_points(mut_character, &recipe.recipe.stats_required);
+
+        // Consume the character material
+
+        // Store the recipe information for claim later
+        mut_character.forge.cooldown = now() + recipe.recipe.cooldown;
+        mut_character.forge.last_recipe = recipe.recipe.id;
+        mut_character.forge.last_recipe_claimed = false;
 
         Ok(())
     }
 
     pub fn claim_forge(ctx: Context<ForgeAccess>) -> Result<()> {
+        let recipe = &ctx.accounts.forge_recipe;
+        let character = &ctx.accounts.character;
+
+        // Check if the character is able to claim the forge recipe
+        if !is_forge_claimable_for_character(recipe, character) {
+            return Err(CharacterError::NotAbleToForgeRecipe.into());
+        }
+
+        // Reward the character
+
+        // Modify the character forge slot to be able to create another recipe
+        let mut_character = &mut ctx.accounts.character;
+        mut_character.forge.last_recipe_claimed = true;
+
         Ok(())
     }
 }
