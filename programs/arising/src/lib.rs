@@ -340,6 +340,7 @@ pub mod arising {
     }
 
     pub fn claim_forge(ctx: Context<ForgeAccess>) -> Result<()> {
+        let recipe = &ctx.accounts.forge_recipe;
         let character = &ctx.accounts.character;
 
         // Check if the character is able to claim the forge recipe
@@ -347,10 +348,16 @@ pub mod arising {
             return Err(CharacterError::NotAbleToClaimForgeRecipe.into());
         }
 
+        let material = recipe.recipe.item_rewarded;
+        let amount = recipe.recipe.item_rewarded_amount;
+        let material_type = recipe.recipe.item_rewarded_type;
+
+        let mut_character = &mut ctx.accounts.character;
+
         // Reward the character
+        forge_reward(mut_character, material, amount, material_type);
 
         // Modify the character forge slot to be able to create another recipe
-        let mut_character = &mut ctx.accounts.character;
         mut_character.forge.last_recipe_claimed = true;
 
         Ok(())

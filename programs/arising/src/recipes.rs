@@ -63,6 +63,28 @@ pub fn is_craft_claimable_for_character(character: &Account<Character>) -> bool 
 }
 
 #[inline(always)]
+pub fn forge_reward(
+    character: &mut Account<Character>,
+    material: u64,
+    amount: u64,
+    material_type: u64
+) {
+    if material == 0 {
+        return;
+    }
+
+    if material_type == (ResourceType::Basic as u64) {
+        character.basic_materials[(material as usize) - 1] += amount;
+    }
+
+    if material_type == (ResourceType::Raw as u64) {
+        character.raw_materials[(material as usize) - 1] += amount;
+    }
+
+    return;
+}
+
+#[inline(always)]
 pub fn consume_materials(
     character: &mut Account<Character>,
     materials: &[u64; 10],
@@ -80,11 +102,11 @@ pub fn consume_materials(
         }
 
         if material_type == (ResourceType::Basic as u64) {
-            consume_basic_material(character, material, amount);
+            character.basic_materials[(material as usize) - 1] -= amount;
         }
 
         if material_type == (ResourceType::Raw as u64) {
-            consume_raw_material(character, material, amount);
+            character.raw_materials[(material as usize) - 1] -= amount;
         }
 
         i += 1;
@@ -104,9 +126,21 @@ pub fn has_enough_materials(
         let amount_required = amounts[i];
         let material_type = types[i];
 
-        let amount = get_material_amount(character, material, material_type);
+        if material == 0 {
+            continue;
+        }
 
-        if amount_required > amount {
+        let mut material_amount: u64 = 0;
+
+        if material_type == (ResourceType::Basic as u64) {
+            material_amount = character.basic_materials[(material as usize) - 1];
+        }
+
+        if material_type == (ResourceType::Raw as u64) {
+            material_amount = character.raw_materials[(material as usize) - 1];
+        }
+
+        if amount_required > material_amount {
             return false;
         }
 
@@ -114,62 +148,6 @@ pub fn has_enough_materials(
     }
 
     return true;
-}
-
-#[inline(always)]
-pub fn consume_raw_material(character: &mut Account<Character>, material: u64, amount: u64) {
-    if material > 16 {
-        return;
-    }
-
-    character.raw_materials[(material as usize) - 1] -= amount;
-
-    return;
-}
-
-#[inline(always)]
-pub fn consume_basic_material(character: &mut Account<Character>, material: u64, amount: u64) {
-    if material > 15 {
-        return;
-    }
-    character.basic_materials[(material as usize) - 1] -= amount;
-
-    return;
-}
-
-#[inline(always)]
-pub fn get_material_amount(
-    character: &Account<Character>,
-    material: u64,
-    material_type: u64
-) -> u64 {
-    if material_type == (ResourceType::Basic as u64) {
-        return get_basic_material_amount(character, material);
-    }
-
-    if material_type == (ResourceType::Raw as u64) {
-        return get_raw_material_amount(character, material);
-    }
-
-    return 0;
-}
-
-#[inline(always)]
-pub fn get_raw_material_amount(character: &Account<Character>, material: u64) -> u64 {
-    if material > 16 {
-        return 0;
-    }
-
-    return character.raw_materials[(material as usize) - 1];
-}
-
-#[inline(always)]
-pub fn get_basic_material_amount(character: &Account<Character>, material: u64) -> u64 {
-    if material > 15 {
-        return 0;
-    }
-
-    return character.basic_materials[(material as usize) - 1];
 }
 
 #[derive(Accounts)]
