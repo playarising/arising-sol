@@ -43,6 +43,8 @@ pub fn refresh(character: &mut Account<Character>) {
     character.pool_stats.speed = character.base_stats.speed;
     character.pool_stats.intellect = character.base_stats.intellect;
 
+    character.last_refresh = now();
+
     return;
 }
 
@@ -56,6 +58,8 @@ pub fn refresh_with_token(character: &mut Account<Character>) {
     character.pool_stats.might = character.base_stats.might;
     character.pool_stats.speed = character.base_stats.speed;
     character.pool_stats.intellect = character.base_stats.intellect;
+
+    character.last_refresh_with_refresher = now();
 
     // TODO burn token.
 }

@@ -25,6 +25,7 @@ import {
     getTokenWalletAccount,
 } from '../data/accounts'
 import { mockMintNFT, waitUntilTimestamp } from './utils'
+import { BASIC_MATERIAL } from '../data/basic_materials'
 
 describe('arising', () => {
     const payer = anchor.web3.Keypair.generate()
@@ -504,9 +505,6 @@ describe('arising', () => {
     it('Start a job quest and claim it', async () => {
         const quest = MockJobQuest()
 
-        const { account: config_program_address } =
-            await getProgramConfigAccount(program)
-
         const { account: quest_account } = await getProgramQuestAccount(
             quest,
             program
@@ -517,20 +515,8 @@ describe('arising', () => {
             program
         )
 
-        const newQuest = quest
-        newQuest.cooldown = 2
-
         const { account: character_token_account } =
             await getTokenWalletAccount(authority.publicKey, mint1.publicKey)
-
-        await program.methods
-            .updateQuest(newQuest)
-            .accounts({
-                config: config_program_address,
-                payer: authority.publicKey,
-                quest: quest_account,
-            })
-            .rpc()
 
         await program.methods
             .startQuest(new anchor.BN(Math.random()))
@@ -544,15 +530,6 @@ describe('arising', () => {
         let character = await program.account.character.fetch(character_account)
 
         await waitUntilTimestamp(character.quest.cooldown.toNumber())
-
-        await program.methods
-            .updateQuest(quest)
-            .accounts({
-                config: config_program_address,
-                payer: authority.publicKey,
-                quest: quest_account,
-            })
-            .rpc()
 
         await program.methods
             .claimQuest()
@@ -576,9 +553,6 @@ describe('arising', () => {
     it('Start a farm quest and claim it', async () => {
         const quest = MockFarmQuest()
 
-        const { account: config_program_address } =
-            await getProgramConfigAccount(program)
-
         const { account: quest_account } = await getProgramQuestAccount(
             quest,
             program
@@ -589,20 +563,8 @@ describe('arising', () => {
             program
         )
 
-        const newQuest = quest
-        newQuest.cooldown = 2
-
         const { account: character_token_account } =
             await getTokenWalletAccount(authority.publicKey, mint1.publicKey)
-
-        await program.methods
-            .updateQuest(newQuest)
-            .accounts({
-                config: config_program_address,
-                payer: authority.publicKey,
-                quest: quest_account,
-            })
-            .rpc()
 
         await program.methods
             .startQuest(new anchor.BN(Math.random()))
@@ -616,15 +578,6 @@ describe('arising', () => {
         let character = await program.account.character.fetch(character_account)
 
         await waitUntilTimestamp(character.quest.cooldown.toNumber())
-
-        await program.methods
-            .updateQuest(quest)
-            .accounts({
-                config: config_program_address,
-                payer: authority.publicKey,
-                quest: quest_account,
-            })
-            .rpc()
 
         await program.methods
             .claimQuest()
@@ -648,9 +601,6 @@ describe('arising', () => {
     it('Start a raid quest and claim it', async () => {
         const quest = MockRaidQuest()
 
-        const { account: config_program_address } =
-            await getProgramConfigAccount(program)
-
         const { account: quest_account } = await getProgramQuestAccount(
             quest,
             program
@@ -661,20 +611,8 @@ describe('arising', () => {
             program
         )
 
-        const newQuest = quest
-        newQuest.cooldown = 2
-
         const { account: character_token_account } =
             await getTokenWalletAccount(authority.publicKey, mint1.publicKey)
-
-        await program.methods
-            .updateQuest(newQuest)
-            .accounts({
-                config: config_program_address,
-                payer: authority.publicKey,
-                quest: quest_account,
-            })
-            .rpc()
 
         await program.methods
             .startQuest(new anchor.BN(Math.random()))
@@ -690,15 +628,6 @@ describe('arising', () => {
         await waitUntilTimestamp(character.quest.cooldown.toNumber())
 
         await program.methods
-            .updateQuest(quest)
-            .accounts({
-                config: config_program_address,
-                payer: authority.publicKey,
-                quest: quest_account,
-            })
-            .rpc()
-
-        await program.methods
             .claimQuest()
             .accounts({
                 character: character_account,
@@ -710,11 +639,13 @@ describe('arising', () => {
         character = character = await program.account.character.fetch(
             character_account
         )
+
+        // TODO check level
     })
 
     it('Refresh the pool points', async () => {
         const { account: config_program_address } =
-        await getProgramConfigAccount(program)
+            await getProgramConfigAccount(program)
 
         const { account: character_account } = await getProgramCharacterAccount(
             mint1.publicKey,
@@ -737,7 +668,7 @@ describe('arising', () => {
             .accounts({
                 character: character_account,
                 characterTokenAccount: character_token_account,
-                config: config_program_address
+                config: config_program_address,
             })
             .rpc()
 
@@ -748,18 +679,50 @@ describe('arising', () => {
             speed: 2,
             intellect: 2,
         })
+    })
 
-        let tx  = await program.methods
-            .performRefresh()
+    it('Start a forge recipe and claim it', async () => {
+        const recipe = MockForgeRecipe()
+
+        const { account: recipe_account } = await getProgramForgeRecipeAccount(
+            recipe,
+            program
+        )
+
+        const { account: character_account } = await getProgramCharacterAccount(
+            mint1.publicKey,
+            program
+        )
+
+        const { account: character_token_account } =
+            await getTokenWalletAccount(authority.publicKey, mint1.publicKey)
+
+        await program.methods
+            .startForge()
             .accounts({
                 character: character_account,
                 characterTokenAccount: character_token_account,
-                config: config_program_address
+                forgeRecipe: recipe_account,
             })
-            .simulate()
+            .rpc()
 
-            console.log(tx)
+        let character = await program.account.character.fetch(character_account)
 
-            // TODO check refresh fail
+        await waitUntilTimestamp(character.forge.cooldown.toNumber())
+
+        await program.methods
+            .claimForge()
+            .accounts({
+                character: character_account,
+                characterTokenAccount: character_token_account,
+                forgeRecipe: recipe_account,
+            })
+            .rpc()
+
+        character = character = await program.account.character.fetch(
+            character_account
+        )
+
+        expect(character.basic[BASIC_MATERIAL.WOOD_PLANK - 1]).to.eq(1)
     })
 })
