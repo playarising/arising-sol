@@ -126,6 +126,30 @@ pub fn sacrifice_points(character: &mut Account<Character>, points: BaseStats) {
     return;
 }
 
+#[inline(always)]
+pub fn add_experience(character: &mut Account<Character>, experience: u64) {
+    character.experience += experience;
+    character.level = get_level(character.experience);
+
+    return;
+}
+
+#[inline(always)]
+pub fn is_slot_available(slot: &CharacterSlot) -> bool {
+    // Check if this is the first use of the slot.
+    if slot.cooldown == 0 {
+        return true;
+    }
+
+    // Check if the cooldown has passed and the slot has been claimed.
+    return slot.cooldown <= now() && slot.last_task_claimed;
+}
+
+#[inline(always)]
+pub fn is_slot_claimable(slot: &CharacterSlot) -> bool {
+    return slot.cooldown <= now() && !slot.last_task_claimed && slot.last_task_id != 0;
+}
+
 #[derive(Accounts)]
 #[instruction(mint: Pubkey, bump: u8)]
 pub struct AddCharacter<'info> {
@@ -184,15 +208,15 @@ pub struct CharacterAccessWithConfig<'info> {
 /// The size of the character struct for actions.
 pub const CHARACTER_SLOT_SIZE: usize =
     64 + // cooldown
-    64 + // last_recipe
-    1; // last_recipe_claimed
+    64 + // last_task_id
+    1; // last_task_claimed
 
 /// The struct for slots used for character actions.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct CharacterSlot {
     pub cooldown: u64,
-    pub last_recipe: u64,
-    pub last_recipe_claimed: bool,
+    pub last_task_id: u64,
+    pub last_task_claimed: bool,
 }
 
 /// The size of the slot in bytes
@@ -272,7 +296,7 @@ pub struct Character {
     pub sacrificed_points: u64,
     pub forge: CharacterSlot,
     pub craft: CharacterSlot,
-    pub upgrade: CharacterSlot,
+    pub quest: CharacterSlot,
     pub equipment: CharacterEquipment,
     pub raw_materials: [u64; 16],
     pub basic_materials: [u64; 15],

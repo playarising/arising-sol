@@ -5,62 +5,9 @@ use crate::config::*;
 use crate::errors::*;
 use crate::codex::*;
 use crate::characters::*;
-use crate::utils::*;
 
 const CRAFT_RECIPE_PREFIX: &str = "arsing_craft";
 const FORGE_RECIPE_PREFIX: &str = "arising_forge_recipe";
-
-#[inline(always)]
-// Check if the forge recipe is available globaly.
-pub fn is_forge_recipe_available(recipe: &Account<ForgeRecipe>) -> bool {
-    return recipe.recipe.available;
-}
-
-#[inline(always)]
-pub fn is_forge_available_for_character(character: &Account<Character>) -> bool {
-    // Check if this is the first use of the character forge.
-    if character.forge.cooldown == 0 {
-        return true;
-    }
-
-    // Check if the cooldown has passed and the forge has been claimed.
-    return character.forge.cooldown <= now() && character.forge.last_recipe_claimed;
-}
-
-#[inline(always)]
-pub fn is_forge_claimable_for_character(character: &Account<Character>) -> bool {
-    return (
-        character.forge.cooldown <= now() &&
-        !character.forge.last_recipe_claimed &&
-        character.forge.last_recipe != 0
-    );
-}
-
-#[inline(always)]
-// Check if the recipe is available globally
-pub fn is_craft_recipe_available(recipe: &Account<CraftRecipe>) -> bool {
-    return recipe.recipe.available;
-}
-
-#[inline(always)]
-pub fn is_craft_available_for_character(character: &Account<Character>) -> bool {
-    // Check if this is the first use of the character craft.
-    if character.craft.cooldown == 0 {
-        return true;
-    }
-
-    // Check if the cooldown has passed and the craft has been claimed.
-    return character.craft.cooldown <= now() && character.craft.last_recipe_claimed;
-}
-
-#[inline(always)]
-pub fn is_craft_claimable_for_character(character: &Account<Character>) -> bool {
-    return (
-        character.craft.cooldown <= now() &&
-        !character.craft.last_recipe_claimed &&
-        character.craft.last_recipe != 0
-    );
-}
 
 #[inline(always)]
 pub fn forge_reward(

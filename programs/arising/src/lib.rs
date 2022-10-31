@@ -293,12 +293,12 @@ pub mod arising {
         let character = &ctx.accounts.character;
 
         // Check if the forge recipe is available globally.
-        if !is_forge_recipe_available(recipe) {
+        if !recipe.recipe.available {
             return Err(ForgeError::NotAvailable.into());
         }
 
         // Check if the character is able to forge
-        if !is_forge_available_for_character(character) {
+        if !is_slot_available(&character.craft) {
             return Err(CharacterError::NotAbleToForgeRecipe.into());
         }
 
@@ -333,8 +333,8 @@ pub mod arising {
 
         // Store the recipe information for claim later
         mut_character.forge.cooldown = now() + recipe.recipe.cooldown;
-        mut_character.forge.last_recipe = recipe.recipe.id;
-        mut_character.forge.last_recipe_claimed = false;
+        mut_character.forge.last_task_id = recipe.recipe.id;
+        mut_character.forge.last_task_claimed = false;
 
         Ok(())
     }
@@ -344,7 +344,7 @@ pub mod arising {
         let character = &ctx.accounts.character;
 
         // Check if the character is able to claim the forge recipe
-        if !is_forge_claimable_for_character(character) {
+        if !is_slot_claimable(&character.forge) {
             return Err(CharacterError::NotAbleToClaimForgeRecipe.into());
         }
 
@@ -358,7 +358,7 @@ pub mod arising {
         forge_reward(mut_character, material, amount, material_type);
 
         // Modify the character forge slot to be able to create another recipe
-        mut_character.forge.last_recipe_claimed = true;
+        mut_character.forge.last_task_claimed = true;
 
         Ok(())
     }
@@ -368,12 +368,12 @@ pub mod arising {
         let character = &ctx.accounts.character;
 
         // Check if the craft recipe is available globally.
-        if !is_craft_recipe_available(recipe) {
+        if !recipe.recipe.available {
             return Err(CraftError::NotAvailable.into());
         }
 
         // Check if the character is able to craft
-        if !is_craft_available_for_character(character) {
+        if !is_slot_available(&character.craft) {
             return Err(CharacterError::NotAbleToCraftRecipe.into());
         }
 
@@ -408,8 +408,8 @@ pub mod arising {
 
         // Store the recipe information for claim later
         mut_character.craft.cooldown = now() + recipe.recipe.cooldown;
-        mut_character.craft.last_recipe = recipe.recipe.id;
-        mut_character.craft.last_recipe_claimed = false;
+        mut_character.craft.last_task_id = recipe.recipe.id;
+        mut_character.craft.last_task_claimed = false;
 
         Ok(())
     }
@@ -418,15 +418,65 @@ pub mod arising {
         let character = &ctx.accounts.character;
 
         // Check if the character is able to claim the craft recipe
-        if !is_craft_claimable_for_character(character) {
+        if !is_slot_claimable(&character.craft) {
             return Err(CharacterError::NotAbleToClaimCraftRecipe.into());
         }
 
         // Reward the character and create an item
+        // TODO: Craft reward.
 
         // Modify the character craft slot to be able to create another recipe
         let mut_character = &mut ctx.accounts.character;
-        mut_character.craft.last_recipe_claimed = true;
+        mut_character.craft.last_task_claimed = true;
+
+        Ok(())
+    }
+
+    pub fn start_quest(ctx: Context<QuestAccess>, seed: u64) -> Result<()> {
+        let quest = &ctx.accounts.quest;
+        let character = &ctx.accounts.character;
+
+        if !quest.available {
+            return Err(QuestError::NotAvailable.into());
+        }
+
+        // Check if the character is able to start the quest
+        if !is_slot_available(&character.quest) {
+            return Err(CharacterError::NotAbleToQuest.into());
+        }
+
+        // Check if the character has enough level for the quest
+        if quest.level_required > character.level {
+            return Err(CharacterError::NotEnoughLevel.into());
+        }
+
+        // Check if the character can consume points of the pool
+        if !can_consume(character, &quest.stats_required) {
+            return Err(CharacterError::NotEnoughPoolPointsToConsume.into());
+        }
+
+        let mut_character = &mut ctx.accounts.character;
+        consume_points(mut_character, &quest.stats_required);
+
+        if quest.quest_type == (QuestType::Raid as u64) {
+            // TODO: add the seed for randomness.
+        }
+
+        mut_character.quest.cooldown = now() + quest.cooldown;
+        mut_character.quest.last_task_id = quest.id;
+        mut_character.quest.last_task_claimed = false;
+
+        Ok(())
+    }
+
+    pub fn claim_quest(ctx: Context<QuestAccess>) -> Result<()> {
+        let quest = &ctx.accounts.quest;
+        let character = &ctx.accounts.character;
+
+        // Check if the character is able to claim the craft recipe
+        if !is_slot_claimable(&character.quest) {
+            return Err(CharacterError::NotAbleToClaimCraftRecipe.into());
+        }
 
         Ok(())
     }

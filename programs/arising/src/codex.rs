@@ -154,8 +154,8 @@ static LEVELS: [Level; 150] = [
 ];
 
 #[inline(always)]
-pub fn get_level(experience: u32) -> u32 {
-    let mut n: u32 = 0;
+pub fn get_level(experience: u64) -> u64 {
+    let mut n: u64 = 0;
 
     loop {
         if experience >= LEVELS[n as usize].min && experience < LEVELS[n as usize].max {
@@ -169,8 +169,8 @@ pub fn get_level(experience: u32) -> u32 {
 }
 
 struct Level {
-    min: u32,
-    max: u32,
+    min: u64,
+    max: u64,
 }
 
 /// The size of the character stats.
