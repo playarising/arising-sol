@@ -320,6 +320,8 @@ describe('arising', () => {
                 recipe_account
             )
 
+            recipe.available = false
+
             expect(anchorRecipe.recipe).to.deep.equal(recipe)
             expect(anchorRecipe.recipe.available).to.eq(false)
 
@@ -357,6 +359,8 @@ describe('arising', () => {
                 recipe_account
             )
 
+            recipe.available = true
+
             expect(anchorRecipe.recipe).to.deep.eq(recipe)
 
             await program.methods
@@ -385,6 +389,8 @@ describe('arising', () => {
             let anchorRecipe = await program.account.craftRecipe.fetch(
                 recipe_account
             )
+
+            recipe.available = false
 
             expect(anchorRecipe.recipe).to.deep.equal(recipe)
             expect(anchorRecipe.recipe.available).to.eq(false)
@@ -423,6 +429,8 @@ describe('arising', () => {
                 recipe_account
             )
 
+            recipe.available = true
+
             expect(anchorRecipe.recipe).to.deep.eq(recipe)
 
             await program.methods
@@ -451,6 +459,8 @@ describe('arising', () => {
             )
 
             let anchorQuest = await program.account.quest.fetch(quest_account)
+
+            quest.available = false
 
             expect(anchorQuest).to.deep.equal(quest)
             expect(anchorQuest.available).to.eq(false)
@@ -484,6 +494,8 @@ describe('arising', () => {
             quest.name = newName
 
             anchorQuest = await program.account.quest.fetch(quest_account)
+
+            quest.available = true
 
             expect(anchorQuest).to.deep.eq(quest)
 

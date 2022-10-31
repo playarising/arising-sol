@@ -59,11 +59,11 @@ pub struct UpdateQuest<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(bump: u8, id: u64)]
+#[instruction(bump: u8, id: u32)]
 pub struct AddQuest<'info> {
     #[account(mut,
         constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority,
-        constraint = (config.quests + 1) == id @ QuestError::InvalidID
+        constraint = (config.quests + 1) == id.into() @ QuestError::InvalidID
     )]
     payer: Signer<'info>,
 

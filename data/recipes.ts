@@ -1,9 +1,8 @@
 import { BASIC_MATERIAL } from './basic_materials'
-import { RESOURCE_TYPE } from './common'
+import { RESOURCE_TYPE, toFixedArray } from './common'
 import { ITEM } from './items'
 import { RAW_MATERIALS } from './raw_materials'
 import { BaseStats, EmptyBaseStats } from './stats'
-import * as anchor from '@project-serum/anchor'
 
 export interface Recipe {
     id: number
@@ -18,6 +17,7 @@ export interface Recipe {
     itemRewarded: BASIC_MATERIAL | ITEM
     itemRewardedType: RESOURCE_TYPE
     itemRewardedAmount: number
+    available?: boolean
 }
 
 export enum FORGE_RECIPE {
@@ -50,9 +50,12 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.WOOD_PLANK]: {
         id: FORGE_RECIPE.WOOD_PLANK,
         name: 'Forge a Wood Plank',
-        materials: [RAW_MATERIALS.WOOD, RAW_MATERIALS.GOLD],
-        materialsTypes: [RESOURCE_TYPE.RAW, RESOURCE_TYPE.RAW],
-        materialsAmounts: [5, 20],
+        materials: toFixedArray(10, [RAW_MATERIALS.WOOD, RAW_MATERIALS.GOLD]),
+        materialsTypes: toFixedArray(10, [
+            RESOURCE_TYPE.RAW,
+            RESOURCE_TYPE.RAW,
+        ]),
+        materialsAmounts: toFixedArray(10, [5, 20]),
         statsRequired: { might: 0, speed: 1, intellect: 1 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 900,
@@ -64,17 +67,17 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.IRONSTONE]: {
         id: FORGE_RECIPE.IRONSTONE,
         name: 'Forge an Ironstone',
-        materials: [
+        materials: toFixedArray(10, [
             RAW_MATERIALS.STONE,
             RAW_MATERIALS.IRON,
             RAW_MATERIALS.GOLD,
-        ],
-        materialsTypes: [
+        ]),
+        materialsTypes: toFixedArray(10, [
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
-        ],
-        materialsAmounts: [10, 1, 25],
+        ]),
+        materialsAmounts: toFixedArray(10, [10, 1, 25]),
         statsRequired: { might: 0, speed: 1, intellect: 2 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 900,
@@ -86,9 +89,12 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.WOOL_FABRIC]: {
         id: FORGE_RECIPE.WOOL_FABRIC,
         name: 'Forge Wool Fabric',
-        materials: [RAW_MATERIALS.WOOL, RAW_MATERIALS.GOLD],
-        materialsTypes: [RESOURCE_TYPE.RAW, RESOURCE_TYPE.RAW],
-        materialsAmounts: [10, 30],
+        materials: toFixedArray(10, [RAW_MATERIALS.WOOL, RAW_MATERIALS.GOLD]),
+        materialsTypes: toFixedArray(10, [
+            RESOURCE_TYPE.RAW,
+            RESOURCE_TYPE.RAW,
+        ]),
+        materialsAmounts: toFixedArray(10, [10, 30]),
         statsRequired: { might: 0, speed: 2, intellect: 3 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 1800,
@@ -100,9 +106,15 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.HARDENED_LEATHER]: {
         id: FORGE_RECIPE.HARDENED_LEATHER,
         name: 'Forge Hardened Leather',
-        materials: [RAW_MATERIALS.LEATHER, RAW_MATERIALS.GOLD],
-        materialsTypes: [RESOURCE_TYPE.RAW, RESOURCE_TYPE.RAW],
-        materialsAmounts: [5, 30],
+        materials: toFixedArray(10, [
+            RAW_MATERIALS.LEATHER,
+            RAW_MATERIALS.GOLD,
+        ]),
+        materialsTypes: toFixedArray(10, [
+            RESOURCE_TYPE.RAW,
+            RESOURCE_TYPE.RAW,
+        ]),
+        materialsAmounts: toFixedArray(10, [5, 30]),
         statsRequired: { might: 0, speed: 2, intellect: 3 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 1800,
@@ -114,9 +126,12 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.COTTON_FABRIC]: {
         id: FORGE_RECIPE.COTTON_FABRIC,
         name: 'Forge Cotton Fabric',
-        materials: [RAW_MATERIALS.COTTON, RAW_MATERIALS.GOLD],
-        materialsTypes: [RESOURCE_TYPE.RAW, RESOURCE_TYPE.RAW],
-        materialsAmounts: [10, 30],
+        materials: toFixedArray(10, [RAW_MATERIALS.COTTON, RAW_MATERIALS.GOLD]),
+        materialsTypes: toFixedArray(10, [
+            RESOURCE_TYPE.RAW,
+            RESOURCE_TYPE.RAW,
+        ]),
+        materialsAmounts: toFixedArray(10, [10, 30]),
         statsRequired: { might: 0, speed: 2, intellect: 3 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 1800,
@@ -128,10 +143,13 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.SILK_FABRIC]: {
         id: FORGE_RECIPE.SILK_FABRIC,
         name: 'Forge Silk Fabric',
-        materials: [RAW_MATERIALS.SILK, RAW_MATERIALS.GOLD],
-        materialsTypes: [RESOURCE_TYPE.RAW, RESOURCE_TYPE.RAW],
+        materials: toFixedArray(10, [RAW_MATERIALS.SILK, RAW_MATERIALS.GOLD]),
+        materialsTypes: toFixedArray(10, [
+            RESOURCE_TYPE.RAW,
+            RESOURCE_TYPE.RAW,
+        ]),
 
-        materialsAmounts: [10, 30],
+        materialsAmounts: toFixedArray(10, [10, 30]),
         statsRequired: { might: 0, speed: 2, intellect: 3 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 1800,
@@ -143,17 +161,17 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.COPPER_BAR]: {
         id: FORGE_RECIPE.COPPER_BAR,
         name: 'Forge a Cooper Bar',
-        materials: [
+        materials: toFixedArray(10, [
             RAW_MATERIALS.COPPER,
             RAW_MATERIALS.COAL,
             RAW_MATERIALS.GOLD,
-        ],
-        materialsTypes: [
+        ]),
+        materialsTypes: toFixedArray(10, [
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
-        ],
-        materialsAmounts: [10, 2, 20],
+        ]),
+        materialsAmounts: toFixedArray(10, [10, 2, 20]),
         statsRequired: { might: 2, speed: 5, intellect: 2 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 4500,
@@ -165,17 +183,17 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.BRONZE_BAR]: {
         id: FORGE_RECIPE.BRONZE_BAR,
         name: 'Forge a Bronze Bar',
-        materials: [
+        materials: toFixedArray(10, [
             RAW_MATERIALS.BRONZE,
             RAW_MATERIALS.COAL,
             RAW_MATERIALS.GOLD,
-        ],
-        materialsTypes: [
+        ]),
+        materialsTypes: toFixedArray(10, [
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
-        ],
-        materialsAmounts: [10, 2, 20],
+        ]),
+        materialsAmounts: toFixedArray(10, [10, 2, 20]),
         statsRequired: { might: 4, speed: 7, intellect: 3 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 6300,
@@ -187,13 +205,17 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.IRON_BAR]: {
         id: FORGE_RECIPE.IRON_BAR,
         name: 'Forge an Iron Bar',
-        materials: [RAW_MATERIALS.IRON, RAW_MATERIALS.COAL, RAW_MATERIALS.GOLD],
-        materialsTypes: [
+        materials: toFixedArray(10, [
+            RAW_MATERIALS.IRON,
+            RAW_MATERIALS.COAL,
+            RAW_MATERIALS.GOLD,
+        ]),
+        materialsTypes: toFixedArray(10, [
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
-        ],
-        materialsAmounts: [10, 2, 20],
+        ]),
+        materialsAmounts: toFixedArray(10, [10, 2, 20]),
         statsRequired: { might: 6, speed: 10, intellect: 4 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 9000,
@@ -205,9 +227,12 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.SILVER_BAR]: {
         id: FORGE_RECIPE.SILVER_BAR,
         name: 'Forge a Silver Bar',
-        materials: [RAW_MATERIALS.SILVER, RAW_MATERIALS.COAL],
-        materialsTypes: [RESOURCE_TYPE.RAW, RESOURCE_TYPE.RAW],
-        materialsAmounts: [100, 2],
+        materials: toFixedArray(10, [RAW_MATERIALS.SILVER, RAW_MATERIALS.COAL]),
+        materialsTypes: toFixedArray(10, [
+            RESOURCE_TYPE.RAW,
+            RESOURCE_TYPE.RAW,
+        ]),
+        materialsAmounts: toFixedArray(10, [100, 2]),
         statsRequired: { might: 5, speed: 8, intellect: 5 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 7200,
@@ -219,9 +244,12 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.GOLD_BAR]: {
         id: FORGE_RECIPE.GOLD_BAR,
         name: 'Forge a Gold Bar',
-        materials: [RAW_MATERIALS.GOLD, RAW_MATERIALS.COAL],
-        materialsTypes: [RESOURCE_TYPE.RAW, RESOURCE_TYPE.RAW],
-        materialsAmounts: [100, 2],
+        materials: toFixedArray(10, [RAW_MATERIALS.GOLD, RAW_MATERIALS.COAL]),
+        materialsTypes: toFixedArray(10, [
+            RESOURCE_TYPE.RAW,
+            RESOURCE_TYPE.RAW,
+        ]),
+        materialsAmounts: toFixedArray(10, [100, 2]),
         statsRequired: { might: 5, speed: 8, intellect: 5 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 7200,
@@ -233,17 +261,17 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.STEEL_BAR]: {
         id: FORGE_RECIPE.STEEL_BAR,
         name: 'Forge a Steel Bar',
-        materials: [
+        materials: toFixedArray(10, [
             BASIC_MATERIAL.IRON_BAR,
             RAW_MATERIALS.COAL,
             RAW_MATERIALS.GOLD,
-        ],
-        materialsTypes: [
+        ]),
+        materialsTypes: toFixedArray(10, [
             RESOURCE_TYPE.BASIC,
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
-        ],
-        materialsAmounts: [1, 5, 50],
+        ]),
+        materialsAmounts: toFixedArray(10, [1, 5, 50]),
         statsRequired: { might: 8, speed: 14, intellect: 5 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 12600,
@@ -255,19 +283,19 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.COBALT_BAR]: {
         id: FORGE_RECIPE.COBALT_BAR,
         name: 'Forge a Cobalt Bar',
-        materials: [
+        materials: toFixedArray(10, [
             RAW_MATERIALS.COBALT,
             RAW_MATERIALS.COAL,
             RAW_MATERIALS.GOLD,
             BASIC_MATERIAL.STEEL_BAR,
-        ],
-        materialsTypes: [
+        ]),
+        materialsTypes: toFixedArray(10, [
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.BASIC,
-        ],
-        materialsAmounts: [10, 5, 60, 1],
+        ]),
+        materialsAmounts: toFixedArray(10, [10, 5, 60, 1]),
         statsRequired: { might: 10, speed: 16, intellect: 6 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 14400,
@@ -279,20 +307,20 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.PLATINUM_BAR]: {
         id: FORGE_RECIPE.PLATINUM_BAR,
         name: 'Forge a Platinum Bar',
-        materials: [
+        materials: toFixedArray(10, [
             RAW_MATERIALS.PLATINUM,
             RAW_MATERIALS.COAL,
             RAW_MATERIALS.GOLD,
             BASIC_MATERIAL.STEEL_BAR,
-        ],
-        materialsTypes: [
+        ]),
+        materialsTypes: toFixedArray(10, [
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.BASIC,
-        ],
+        ]),
 
-        materialsAmounts: [10, 5, 60, 1],
+        materialsAmounts: toFixedArray(10, [10, 5, 60, 1]),
         statsRequired: { might: 12, speed: 18, intellect: 7 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 16200,
@@ -304,19 +332,19 @@ export const FORGE_RECIPES_DATA: {
     [FORGE_RECIPE.ADAMANTINE_BAR]: {
         id: FORGE_RECIPE.ADAMANTINE_BAR,
         name: 'Forge an Adamantine Bar',
-        materials: [
+        materials: toFixedArray(10, [
             RAW_MATERIALS.ADAMANTINE,
             RAW_MATERIALS.COAL,
             RAW_MATERIALS.GOLD,
             BASIC_MATERIAL.STEEL_BAR,
-        ],
-        materialsTypes: [
+        ]),
+        materialsTypes: toFixedArray(10, [
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.RAW,
             RESOURCE_TYPE.BASIC,
-        ],
-        materialsAmounts: [10, 5, 60, 1],
+        ]),
+        materialsAmounts: toFixedArray(10, [10, 5, 60, 1]),
         statsRequired: { might: 14, speed: 20, intellect: 8 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 18000,
@@ -333,9 +361,12 @@ export const CRAFT_RECIPES_DATA: {
     [CRAFT_RECIPE.BONE_DAGGER]: {
         id: CRAFT_RECIPE.BONE_DAGGER,
         name: 'Craft a Bone Dagger',
-        materials: [RAW_MATERIALS.BONES, RAW_MATERIALS.GOLD],
-        materialsTypes: [RESOURCE_TYPE.RAW, RESOURCE_TYPE.RAW],
-        materialsAmounts: [5, 50],
+        materials: toFixedArray(10, [RAW_MATERIALS.BONES, RAW_MATERIALS.GOLD]),
+        materialsTypes: toFixedArray(10, [
+            RESOURCE_TYPE.RAW,
+            RESOURCE_TYPE.RAW,
+        ]),
+        materialsAmounts: toFixedArray(10, [5, 50]),
         statsRequired: { might: 1, speed: 1, intellect: 3 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 3600,
@@ -347,9 +378,12 @@ export const CRAFT_RECIPES_DATA: {
     [CRAFT_RECIPE.BONE_HAMMER]: {
         id: CRAFT_RECIPE.BONE_HAMMER,
         name: 'Craft a Bone Hammer',
-        materials: [RAW_MATERIALS.BONES, RAW_MATERIALS.GOLD],
-        materialsTypes: [RESOURCE_TYPE.RAW, RESOURCE_TYPE.RAW],
-        materialsAmounts: [15, 50],
+        materials: toFixedArray(10, [RAW_MATERIALS.BONES, RAW_MATERIALS.GOLD]),
+        materialsTypes: toFixedArray(10, [
+            RESOURCE_TYPE.RAW,
+            RESOURCE_TYPE.RAW,
+        ]),
+        materialsAmounts: toFixedArray(10, [15, 50]),
         statsRequired: { might: 2, speed: 2, intellect: 3 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 7200,
@@ -361,9 +395,12 @@ export const CRAFT_RECIPES_DATA: {
     [CRAFT_RECIPE.BONE_AXE]: {
         id: CRAFT_RECIPE.BONE_AXE,
         name: 'Craft a Bone Axe',
-        materials: [RAW_MATERIALS.BONES, RAW_MATERIALS.GOLD],
-        materialsTypes: [RESOURCE_TYPE.RAW, RESOURCE_TYPE.RAW],
-        materialsAmounts: [15, 50],
+        materials: toFixedArray(10, [RAW_MATERIALS.BONES, RAW_MATERIALS.GOLD]),
+        materialsTypes: toFixedArray(10, [
+            RESOURCE_TYPE.RAW,
+            RESOURCE_TYPE.RAW,
+        ]),
+        materialsAmounts: toFixedArray(10, [15, 50]),
         statsRequired: { might: 2, speed: 2, intellect: 3 },
         statsSacrificed: EmptyBaseStats,
         cooldown: 7200,

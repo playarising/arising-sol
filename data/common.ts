@@ -15,3 +15,15 @@ export function toAnchorFriendlyID(id: number): Uint8Array {
     }
     return view
 }
+
+export function toFixedArray(size: number, array: any[]): number[] {
+    const fixed = new Array<number>(size)
+    for (let i = 0; i < size; i++) {
+        if (array[i]) {
+            fixed[i] = array[i]
+        } else {
+            fixed[i] = 0
+        }
+    }
+    return fixed
+}
