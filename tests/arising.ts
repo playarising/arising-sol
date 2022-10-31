@@ -2,8 +2,19 @@ import * as anchor from '@project-serum/anchor'
 import { Program } from '@project-serum/anchor'
 import { LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { expect } from 'chai'
-import { QUESTS_DATA } from '../data/quests'
-import { CRAFT_RECIPES_DATA, FORGE_RECIPES_DATA } from '../data/recipes'
+import {
+    MockFarmQuest,
+    MockJobQuest,
+    MockRaidQuest,
+    QUESTS,
+    QUESTS_DATA,
+} from '../data/quests'
+import {
+    CRAFT_RECIPES_DATA,
+    FORGE_RECIPES_DATA,
+    MockCraftRecipe,
+    MockForgeRecipe,
+} from '../data/recipes'
 import { Arising } from '../target/types/arising'
 import {
     getProgramCharacterAccount,
@@ -13,7 +24,7 @@ import {
     getProgramQuestAccount,
     getTokenWalletAccount,
 } from '../data/accounts'
-import { mockMintNFT } from './utils'
+import { mockMintNFT, waitUntilTimestamp } from './utils'
 
 describe('arising', () => {
     const payer = anchor.web3.Keypair.generate()
@@ -235,61 +246,55 @@ describe('arising', () => {
         expect(character3.poolStats).to.deep.eq(assignStats)
     })
 
-    it('Add forge recipes', async () => {
+    it('Add mock forge recipe', async () => {
         const keys = Object.keys(FORGE_RECIPES_DATA)
 
         const { account: config_program_address } =
             await getProgramConfigAccount(program)
 
-        for (const key of keys) {
-            const recipe = FORGE_RECIPES_DATA[key]
+        const recipe = MockForgeRecipe()
 
-            const { account: recipe_account, bump } =
-                await getProgramForgeRecipeAccount(recipe, program)
+        const { account: recipe_account, bump } =
+            await getProgramForgeRecipeAccount(recipe, program)
 
-            await program.methods
-                .addForgeRecipe(bump, recipe.id, recipe)
-                .accounts({
-                    config: config_program_address,
-                    payer: authority.publicKey,
-                    forgeRecipe: recipe_account,
-                })
-                .rpc()
-        }
+        await program.methods
+            .addForgeRecipe(bump, recipe.id, recipe)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                forgeRecipe: recipe_account,
+            })
+            .rpc()
     })
 
-    it('Add craft recipes', async () => {
+    it('Add mock craft recipe', async () => {
         const keys = Object.keys(CRAFT_RECIPES_DATA)
 
         const { account: config_program_address } =
             await getProgramConfigAccount(program)
 
-        for (const key of keys) {
-            const recipe = CRAFT_RECIPES_DATA[key]
+        const recipe = MockCraftRecipe()
 
-            const { account: recipe_account, bump } =
-                await getProgramCraftRecipeAccount(recipe, program)
+        const { account: recipe_account, bump } =
+            await getProgramCraftRecipeAccount(recipe, program)
 
-            await program.methods
-                .addCraftRecipe(bump, recipe.id, recipe)
-                .accounts({
-                    config: config_program_address,
-                    payer: authority.publicKey,
-                    craftRecipe: recipe_account,
-                })
-                .rpc()
-        }
+        await program.methods
+            .addCraftRecipe(bump, recipe.id, recipe)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                craftRecipe: recipe_account,
+            })
+            .rpc()
     })
 
-    it('Add quests', async () => {
-        const keys = Object.keys(QUESTS_DATA)
-
+    it('Add mock quests', async () => {
         const { account: config_program_address } =
             await getProgramConfigAccount(program)
 
-        for (const key of keys) {
-            const quest = QUESTS_DATA[key]
+        const quests = [MockJobQuest(), MockFarmQuest(), MockRaidQuest()]
 
+        for (const quest of quests) {
             const { account: quest_account, bump } =
                 await getProgramQuestAccount(quest, program)
 
@@ -305,154 +310,140 @@ describe('arising', () => {
     })
 
     it('Fetch all forge recipes modify them and compare', async () => {
-        const keys = Object.keys(FORGE_RECIPES_DATA)
-
         const { account: config_program_address } =
             await getProgramConfigAccount(program)
 
-        for (const key of keys) {
-            const recipe = FORGE_RECIPES_DATA[key]
+        const recipe = MockForgeRecipe()
 
-            const { account: recipe_account } =
-                await getProgramForgeRecipeAccount(recipe, program)
+        const { account: recipe_account } = await getProgramForgeRecipeAccount(
+            recipe,
+            program
+        )
 
-            let anchorRecipe = await program.account.forgeRecipe.fetch(
-                recipe_account
-            )
+        let anchorRecipe = await program.account.forgeRecipe.fetch(
+            recipe_account
+        )
 
-            recipe.available = false
+        recipe.available = false
 
-            expect(anchorRecipe.recipe).to.deep.equal(recipe)
-            expect(anchorRecipe.recipe.available).to.eq(false)
+        expect(anchorRecipe.recipe).to.deep.equal(recipe)
+        expect(anchorRecipe.recipe.available).to.eq(false)
 
-            await program.methods
-                .updateForgeRecipeAvailability(true)
-                .accounts({
-                    config: config_program_address,
-                    payer: authority.publicKey,
-                    forgeRecipe: recipe_account,
-                })
-                .rpc()
+        await program.methods
+            .updateForgeRecipeAvailability(true)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                forgeRecipe: recipe_account,
+            })
+            .rpc()
 
-            anchorRecipe = await program.account.forgeRecipe.fetch(
-                recipe_account
-            )
+        anchorRecipe = await program.account.forgeRecipe.fetch(recipe_account)
 
-            expect(anchorRecipe.recipe.available).to.eq(true)
+        expect(anchorRecipe.recipe.available).to.eq(true)
 
-            const newName = 'New Recipe Name'
-            const newRecipe = recipe
-            newRecipe.name = newName
+        const newName = 'New Recipe Name'
+        const newRecipe = recipe
+        newRecipe.name = newName
 
-            await program.methods
-                .updateForgeRecipe(newRecipe)
-                .accounts({
-                    config: config_program_address,
-                    payer: authority.publicKey,
-                    forgeRecipe: recipe_account,
-                })
-                .rpc()
+        await program.methods
+            .updateForgeRecipe(newRecipe)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                forgeRecipe: recipe_account,
+            })
+            .rpc()
 
-            recipe.name = newName
+        recipe.name = newName
 
-            anchorRecipe = await program.account.forgeRecipe.fetch(
-                recipe_account
-            )
+        anchorRecipe = await program.account.forgeRecipe.fetch(recipe_account)
 
-            recipe.available = true
+        recipe.available = true
 
-            expect(anchorRecipe.recipe).to.deep.eq(recipe)
+        expect(anchorRecipe.recipe).to.deep.eq(recipe)
 
-            await program.methods
-                .updateForgeRecipe(recipe)
-                .accounts({
-                    config: config_program_address,
-                    payer: authority.publicKey,
-                    forgeRecipe: recipe_account,
-                })
-                .rpc()
-        }
+        await program.methods
+            .updateForgeRecipe(recipe)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                forgeRecipe: recipe_account,
+            })
+            .rpc()
     })
 
     it('Fetch all craft recipes modify them and compare', async () => {
-        const keys = Object.keys(CRAFT_RECIPES_DATA)
-
         const { account: config_program_address } =
             await getProgramConfigAccount(program)
 
-        for (const key of keys) {
-            const recipe = CRAFT_RECIPES_DATA[key]
+        const recipe = MockCraftRecipe()
 
-            const { account: recipe_account } =
-                await getProgramCraftRecipeAccount(recipe, program)
+        const { account: recipe_account } = await getProgramCraftRecipeAccount(
+            recipe,
+            program
+        )
 
-            let anchorRecipe = await program.account.craftRecipe.fetch(
-                recipe_account
-            )
+        let anchorRecipe = await program.account.craftRecipe.fetch(
+            recipe_account
+        )
 
-            recipe.available = false
+        recipe.available = false
 
-            expect(anchorRecipe.recipe).to.deep.equal(recipe)
-            expect(anchorRecipe.recipe.available).to.eq(false)
+        expect(anchorRecipe.recipe).to.deep.equal(recipe)
+        expect(anchorRecipe.recipe.available).to.eq(false)
 
-            await program.methods
-                .updateCraftRecipeAvailability(true)
-                .accounts({
-                    config: config_program_address,
-                    payer: authority.publicKey,
-                    craftRecipe: recipe_account,
-                })
-                .rpc()
+        await program.methods
+            .updateCraftRecipeAvailability(true)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                craftRecipe: recipe_account,
+            })
+            .rpc()
 
-            anchorRecipe = await program.account.craftRecipe.fetch(
-                recipe_account
-            )
+        anchorRecipe = await program.account.craftRecipe.fetch(recipe_account)
 
-            expect(anchorRecipe.recipe.available).to.eq(true)
+        expect(anchorRecipe.recipe.available).to.eq(true)
 
-            const newName = 'New Recipe Name'
-            const newRecipe = recipe
-            newRecipe.name = newName
+        const newName = 'New Recipe Name'
+        const newRecipe = recipe
+        newRecipe.name = newName
 
-            await program.methods
-                .updateCraftRecipe(newRecipe)
-                .accounts({
-                    config: config_program_address,
-                    payer: authority.publicKey,
-                    craftRecipe: recipe_account,
-                })
-                .rpc()
+        await program.methods
+            .updateCraftRecipe(newRecipe)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                craftRecipe: recipe_account,
+            })
+            .rpc()
 
-            recipe.name = newName
+        recipe.name = newName
 
-            anchorRecipe = await program.account.craftRecipe.fetch(
-                recipe_account
-            )
+        anchorRecipe = await program.account.craftRecipe.fetch(recipe_account)
 
-            recipe.available = true
+        recipe.available = true
 
-            expect(anchorRecipe.recipe).to.deep.eq(recipe)
+        expect(anchorRecipe.recipe).to.deep.eq(recipe)
 
-            await program.methods
-                .updateCraftRecipe(recipe)
-                .accounts({
-                    config: config_program_address,
-                    payer: authority.publicKey,
-                    craftRecipe: recipe_account,
-                })
-                .rpc()
-        }
+        await program.methods
+            .updateCraftRecipe(recipe)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                craftRecipe: recipe_account,
+            })
+            .rpc()
     })
 
     it('Fetch all quests modify them and compare', async () => {
-        const keys = Object.keys(QUESTS_DATA)
-
         const { account: config_program_address } =
             await getProgramConfigAccount(program)
 
-        for (const key of keys) {
-            const quest = QUESTS_DATA[key]
+        const quests = [MockJobQuest(), MockFarmQuest(), MockRaidQuest()]
 
+        for (const quest of quests) {
             const { account: quest_account } = await getProgramQuestAccount(
                 quest,
                 program
@@ -508,5 +499,267 @@ describe('arising', () => {
                 })
                 .rpc()
         }
+    })
+
+    it('Start a job quest and claim it', async () => {
+        const quest = MockJobQuest()
+
+        const { account: config_program_address } =
+            await getProgramConfigAccount(program)
+
+        const { account: quest_account } = await getProgramQuestAccount(
+            quest,
+            program
+        )
+
+        const { account: character_account } = await getProgramCharacterAccount(
+            mint1.publicKey,
+            program
+        )
+
+        const newQuest = quest
+        newQuest.cooldown = 2
+
+        const { account: character_token_account } =
+            await getTokenWalletAccount(authority.publicKey, mint1.publicKey)
+
+        await program.methods
+            .updateQuest(newQuest)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                quest: quest_account,
+            })
+            .rpc()
+
+        await program.methods
+            .startQuest(new anchor.BN(Math.random()))
+            .accounts({
+                character: character_account,
+                characterTokenAccount: character_token_account,
+                quest: quest_account,
+            })
+            .rpc()
+
+        let character = await program.account.character.fetch(character_account)
+
+        await waitUntilTimestamp(character.quest.cooldown.toNumber())
+
+        await program.methods
+            .updateQuest(quest)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                quest: quest_account,
+            })
+            .rpc()
+
+        await program.methods
+            .claimQuest()
+            .accounts({
+                character: character_account,
+                characterTokenAccount: character_token_account,
+                quest: quest_account,
+            })
+            .rpc()
+
+        character = character = await program.account.character.fetch(
+            character_account
+        )
+
+        expect(character.raw).to.deep.eq([
+            100, 100, 0, 100, 0, 100, 100, 100, 100, 100, 100, 100, 0, 0, 0, 0,
+            0,
+        ])
+    })
+
+    it('Start a farm quest and claim it', async () => {
+        const quest = MockFarmQuest()
+
+        const { account: config_program_address } =
+            await getProgramConfigAccount(program)
+
+        const { account: quest_account } = await getProgramQuestAccount(
+            quest,
+            program
+        )
+
+        const { account: character_account } = await getProgramCharacterAccount(
+            mint1.publicKey,
+            program
+        )
+
+        const newQuest = quest
+        newQuest.cooldown = 2
+
+        const { account: character_token_account } =
+            await getTokenWalletAccount(authority.publicKey, mint1.publicKey)
+
+        await program.methods
+            .updateQuest(newQuest)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                quest: quest_account,
+            })
+            .rpc()
+
+        await program.methods
+            .startQuest(new anchor.BN(Math.random()))
+            .accounts({
+                character: character_account,
+                characterTokenAccount: character_token_account,
+                quest: quest_account,
+            })
+            .rpc()
+
+        let character = await program.account.character.fetch(character_account)
+
+        await waitUntilTimestamp(character.quest.cooldown.toNumber())
+
+        await program.methods
+            .updateQuest(quest)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                quest: quest_account,
+            })
+            .rpc()
+
+        await program.methods
+            .claimQuest()
+            .accounts({
+                character: character_account,
+                characterTokenAccount: character_token_account,
+                quest: quest_account,
+            })
+            .rpc()
+
+        character = character = await program.account.character.fetch(
+            character_account
+        )
+
+        expect(character.raw).to.deep.eq([
+            200, 200, 0, 100, 0, 100, 100, 100, 100, 100, 100, 100, 0, 0, 0, 0,
+            0,
+        ])
+    })
+
+    it('Start a raid quest and claim it', async () => {
+        const quest = MockRaidQuest()
+
+        const { account: config_program_address } =
+            await getProgramConfigAccount(program)
+
+        const { account: quest_account } = await getProgramQuestAccount(
+            quest,
+            program
+        )
+
+        const { account: character_account } = await getProgramCharacterAccount(
+            mint1.publicKey,
+            program
+        )
+
+        const newQuest = quest
+        newQuest.cooldown = 2
+
+        const { account: character_token_account } =
+            await getTokenWalletAccount(authority.publicKey, mint1.publicKey)
+
+        await program.methods
+            .updateQuest(newQuest)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                quest: quest_account,
+            })
+            .rpc()
+
+        await program.methods
+            .startQuest(new anchor.BN(Math.random()))
+            .accounts({
+                character: character_account,
+                characterTokenAccount: character_token_account,
+                quest: quest_account,
+            })
+            .rpc()
+
+        let character = await program.account.character.fetch(character_account)
+
+        await waitUntilTimestamp(character.quest.cooldown.toNumber())
+
+        await program.methods
+            .updateQuest(quest)
+            .accounts({
+                config: config_program_address,
+                payer: authority.publicKey,
+                quest: quest_account,
+            })
+            .rpc()
+
+        await program.methods
+            .claimQuest()
+            .accounts({
+                character: character_account,
+                characterTokenAccount: character_token_account,
+                quest: quest_account,
+            })
+            .rpc()
+
+        character = character = await program.account.character.fetch(
+            character_account
+        )
+    })
+
+    it('Refresh the pool points', async () => {
+        const { account: config_program_address } =
+        await getProgramConfigAccount(program)
+
+        const { account: character_account } = await getProgramCharacterAccount(
+            mint1.publicKey,
+            program
+        )
+
+        const { account: character_token_account } =
+            await getTokenWalletAccount(authority.publicKey, mint1.publicKey)
+
+        let character = await program.account.character.fetch(character_account)
+
+        expect(character.poolStats).to.deep.eq({
+            might: 1,
+            speed: 1,
+            intellect: 1,
+        })
+
+        await program.methods
+            .performRefresh()
+            .accounts({
+                character: character_account,
+                characterTokenAccount: character_token_account,
+                config: config_program_address
+            })
+            .rpc()
+
+        character = await program.account.character.fetch(character_account)
+
+        expect(character.poolStats).to.deep.eq({
+            might: 2,
+            speed: 2,
+            intellect: 2,
+        })
+
+        let tx  = await program.methods
+            .performRefresh()
+            .accounts({
+                character: character_account,
+                characterTokenAccount: character_token_account,
+                config: config_program_address
+            })
+            .simulate()
+
+            console.log(tx)
+
+            // TODO check refresh fail
     })
 })

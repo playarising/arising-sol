@@ -21,11 +21,11 @@ pub fn forge_reward(
     }
 
     if material_type == (ResourceType::Basic as u16) {
-        character.resources.basic[(material as usize) - 1] += amount;
+        character.basic[(material as usize) - 1] += amount;
     }
 
     if material_type == (ResourceType::Raw as u16) {
-        character.resources.raw[(material as usize) - 1] += amount;
+        character.raw[(material as usize) - 1] += amount;
     }
 
     return;
@@ -39,21 +39,24 @@ pub fn consume_materials(
     types: &[u16; 10]
 ) {
     let mut i: usize = 0;
-    while i < 10 {
+
+    loop {
+        if i >= 10 {
+            break;
+        }
+
         let material = materials[i];
         let amount = amounts[i];
         let material_type = types[i];
 
-        if material == 0 {
-            continue;
-        }
+        if material != 0 {
+            if material_type == (ResourceType::Basic as u16) {
+                character.basic[(material - 1) as usize] -= amount;
+            }
 
-        if material_type == (ResourceType::Basic as u16) {
-            character.resources.basic[(material as usize) - 1] -= amount;
-        }
-
-        if material_type == (ResourceType::Raw as u16) {
-            character.resources.raw[(material as usize) - 1] -= amount;
+            if material_type == (ResourceType::Raw as u16) {
+                character.raw[(material - 1) as usize] -= amount;
+            }
         }
 
         i += 1;
@@ -68,27 +71,29 @@ pub fn has_enough_materials(
     types: &[u16; 10]
 ) -> bool {
     let mut i: usize = 0;
-    while i < 10 {
+    loop {
+        if i >= 10 {
+            break;
+        }
+
         let material = materials[i];
         let amount_required = amounts[i];
         let material_type = types[i];
 
-        if material == 0 {
-            continue;
-        }
+        if material != 0 {
+            let mut material_amount: u32 = 0;
 
-        let mut material_amount: u32 = 0;
+            if material_type == (ResourceType::Basic as u16) {
+                material_amount = character.basic[(material as usize) - 1];
+            }
 
-        if material_type == (ResourceType::Basic as u16) {
-            material_amount = character.resources.basic[(material as usize) - 1];
-        }
+            if material_type == (ResourceType::Raw as u16) {
+                material_amount = character.raw[(material as usize) - 1];
+            }
 
-        if material_type == (ResourceType::Raw as u16) {
-            material_amount = character.resources.raw[(material as usize) - 1];
-        }
-
-        if amount_required > material_amount {
-            return false;
+            if amount_required > material_amount {
+                return false;
+            }
         }
 
         i += 1;

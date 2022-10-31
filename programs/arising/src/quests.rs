@@ -15,15 +15,17 @@ pub fn quest_rewards(
     amounts: &[u32; 10]
 ) {
     let mut i: usize = 0;
-    while i < 10 {
+    loop {
+        if i >= 10 {
+            break;
+        }
+
         let material = materials[i];
         let amount = amounts[i];
 
-        if material == 0 {
-            continue;
+        if material != 0 {
+            character.raw[(material - 1) as usize] += amount;
         }
-
-        character.resources.raw[(material as usize) - 1] += amount;
 
         i += 1;
     }

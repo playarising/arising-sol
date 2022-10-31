@@ -17,7 +17,7 @@ export interface Recipe {
     itemRewarded: BASIC_MATERIAL | ITEM
     itemRewardedType: RESOURCE_TYPE
     itemRewardedAmount: number
-    available?: boolean
+    available: boolean
 }
 
 export enum FORGE_RECIPE {
@@ -44,6 +44,18 @@ export enum CRAFT_RECIPE {
     BONE_AXE,
 }
 
+export const MockForgeRecipe = (): Recipe => {
+    const baseRecipe = FORGE_RECIPES_DATA[FORGE_RECIPE.WOOD_PLANK]
+    baseRecipe.cooldown = 2
+    return baseRecipe
+}
+
+export const MockCraftRecipe = (): Recipe => {
+    const baseRecipe = CRAFT_RECIPES_DATA[CRAFT_RECIPE.BONE_DAGGER]
+    baseRecipe.cooldown = 2
+    return baseRecipe
+}
+
 export const FORGE_RECIPES_DATA: {
     [k in FORGE_RECIPE]: Recipe
 } = {
@@ -63,6 +75,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.WOOD_PLANK,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.IRONSTONE]: {
         id: FORGE_RECIPE.IRONSTONE,
@@ -85,6 +98,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.IRONSTONE,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.WOOL_FABRIC]: {
         id: FORGE_RECIPE.WOOL_FABRIC,
@@ -102,6 +116,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.WOOL_FABRIC,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.HARDENED_LEATHER]: {
         id: FORGE_RECIPE.HARDENED_LEATHER,
@@ -122,6 +137,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.HARDENED_LEATHER,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.COTTON_FABRIC]: {
         id: FORGE_RECIPE.COTTON_FABRIC,
@@ -139,6 +155,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.COTTON_FABRIC,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.SILK_FABRIC]: {
         id: FORGE_RECIPE.SILK_FABRIC,
@@ -157,6 +174,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.SILK_FABRIC,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.COPPER_BAR]: {
         id: FORGE_RECIPE.COPPER_BAR,
@@ -179,6 +197,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.COPPER_BAR,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.BRONZE_BAR]: {
         id: FORGE_RECIPE.BRONZE_BAR,
@@ -201,6 +220,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.BRONZE_BAR,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.IRON_BAR]: {
         id: FORGE_RECIPE.IRON_BAR,
@@ -223,6 +243,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.IRON_BAR,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.SILVER_BAR]: {
         id: FORGE_RECIPE.SILVER_BAR,
@@ -240,6 +261,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.SILVER_BAR,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.GOLD_BAR]: {
         id: FORGE_RECIPE.GOLD_BAR,
@@ -257,6 +279,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.GOLD_BAR,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.STEEL_BAR]: {
         id: FORGE_RECIPE.STEEL_BAR,
@@ -279,6 +302,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.STEEL_BAR,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.COBALT_BAR]: {
         id: FORGE_RECIPE.COBALT_BAR,
@@ -303,6 +327,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.COBALT_BAR,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.PLATINUM_BAR]: {
         id: FORGE_RECIPE.PLATINUM_BAR,
@@ -328,6 +353,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.PLATINUM_BAR,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
     [FORGE_RECIPE.ADAMANTINE_BAR]: {
         id: FORGE_RECIPE.ADAMANTINE_BAR,
@@ -352,6 +378,7 @@ export const FORGE_RECIPES_DATA: {
         itemRewarded: BASIC_MATERIAL.ADAMANTINE_BAR,
         itemRewardedType: RESOURCE_TYPE.BASIC,
         itemRewardedAmount: 1,
+        available: false,
     },
 }
 
@@ -374,6 +401,7 @@ export const CRAFT_RECIPES_DATA: {
         itemRewarded: ITEM.BONE_DAGGER,
         itemRewardedType: RESOURCE_TYPE.ITEM,
         itemRewardedAmount: 1,
+        available: false,
     },
     [CRAFT_RECIPE.BONE_HAMMER]: {
         id: CRAFT_RECIPE.BONE_HAMMER,
@@ -391,6 +419,7 @@ export const CRAFT_RECIPES_DATA: {
         itemRewarded: ITEM.BONE_HAMMER,
         itemRewardedType: RESOURCE_TYPE.ITEM,
         itemRewardedAmount: 1,
+        available: false,
     },
     [CRAFT_RECIPE.BONE_AXE]: {
         id: CRAFT_RECIPE.BONE_AXE,
@@ -408,5 +437,6 @@ export const CRAFT_RECIPES_DATA: {
         itemRewarded: ITEM.BONE_AXE,
         itemRewardedType: RESOURCE_TYPE.ITEM,
         itemRewardedAmount: 1,
+        available: false,
     },
 }

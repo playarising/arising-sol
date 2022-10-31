@@ -92,3 +92,18 @@ export const mockMintNFT = async (
 
     await provider.connection.sendTransaction(transaction)
 }
+
+export const waitUntilTimestamp = (timestamp: number): Promise<void> => {
+    return new Promise((resolve) => {
+        const interval = setInterval(() => {
+            checkTime()
+        }, 1000)
+        const checkTime = () => {
+            const now = Math.floor(Date.now() / 1000)
+            if (now > timestamp) {
+                clearInterval(interval)
+                resolve()
+            }
+        }
+    })
+}

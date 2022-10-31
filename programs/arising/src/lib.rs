@@ -475,7 +475,7 @@ pub mod arising {
 
         // Check if the character is able to claim the craft recipe
         if !is_slot_claimable(&character.quest) {
-            return Err(CharacterError::NotAbleToClaimCraftRecipe.into());
+            return Err(CharacterError::NotAbleToClaimQuest.into());
         }
 
         let mut_character = &mut ctx.accounts.character;
@@ -490,6 +490,10 @@ pub mod arising {
         } else {
             // TODO: perform fight and experience reward.
         }
+
+        // Modify the character slot to be able to start another quest
+        let mut_character = &mut ctx.accounts.character;
+        mut_character.quest.last_task_claimed = true;
 
         Ok(())
     }

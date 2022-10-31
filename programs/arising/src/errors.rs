@@ -3,29 +3,29 @@ use anchor_lang::prelude::*;
 /// Character context errors
 #[error_code]
 pub enum CharacterError {
-    #[msg("Character: not enough level to perform this actions.")]
+    #[msg("Character: not enough level to perform this actions")]
     NotEnoughLevel,
-    #[msg("Character: not enough pool points to consume.")]
+    #[msg("Character: not enough pool points to consume")]
     NotEnoughPoolPointsToConsume,
-    #[msg("Character: not enough base points to sacrifice.")]
+    #[msg("Character: not enough base points to sacrifice")]
     NotEnoughBasePointsToSacrifice,
-    #[msg("Character: not enough points available to assign.")]
+    #[msg("Character: not enough points available to assign")]
     NotEnoughAssignablePoints,
-    #[msg("Character: not able to refresh currently.")]
+    #[msg("Character: not able to refresh now")]
     RefreshNotAvailable,
-    #[msg("Character: character not able to forge a recipe now.")]
+    #[msg("Character: character not able to forge a recipe now")]
     NotAbleToForgeRecipe,
-    #[msg("Character: character not able to craft a recipe now.")]
+    #[msg("Character: character not able to craft a recipe now")]
     NotAbleToCraftRecipe,
-    #[msg("Character: character not able to start a quest.")]
+    #[msg("Character: character not able to start a quest")]
     NotAbleToQuest,
-    #[msg("Character: character not able to claim the forge recipe now.")]
+    #[msg("Character: character not able to claim the forge recipe now")]
     NotAbleToClaimForgeRecipe,
-    #[msg("Character: character not able to claim the craft recipe now.")]
+    #[msg("Character: character not able to claim the craft recipe now")]
     NotAbleToClaimCraftRecipe,
-    #[msg("Character: character not able to claim the quest now.")]
+    #[msg("Character: character not able to claim the quest now")]
     NotAbleToClaimQuest,
-    #[msg("Character: not enough resources to perform the task.")]
+    #[msg("Character: not enough resources to perform the task")]
     NotEnoughResources,
 }
 
