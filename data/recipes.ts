@@ -2,29 +2,8 @@ import { BASIC_MATERIAL } from './basic_materials'
 import { RESOURCE_TYPE } from './common'
 import { ITEM } from './items'
 import { RAW_MATERIALS } from './raw_materials'
-import {
-    AnchorFriendlyBaseStats,
-    BaseStats,
-    EmptyBaseStats,
-    toAnchorFriendlyBaseStats,
-    toNormalBaseStats,
-} from './stats'
+import { BaseStats, EmptyBaseStats } from './stats'
 import * as anchor from '@project-serum/anchor'
-
-interface AnchorFriendlyRecipe {
-    id: anchor.BN
-    name: string
-    materials: anchor.BN[]
-    materialsAmounts: anchor.BN[]
-    materialsTypes: anchor.BN[]
-    statsRequired: AnchorFriendlyBaseStats
-    statsSacrificed: AnchorFriendlyBaseStats
-    cooldown: anchor.BN
-    levelRequired: anchor.BN
-    itemRewarded: anchor.BN
-    itemRewardedType: anchor.BN
-    itemRewardedAmount: anchor.BN
-}
 
 export interface Recipe {
     id: number
@@ -39,50 +18,6 @@ export interface Recipe {
     itemRewarded: BASIC_MATERIAL | ITEM
     itemRewardedType: RESOURCE_TYPE
     itemRewardedAmount: number
-}
-
-export function toAnchorFriendlyRecipe(recipe: Recipe): AnchorFriendlyRecipe {
-    return {
-        id: new anchor.BN(recipe.id),
-        name: recipe.name,
-        materials: recipe.materials.map((material) => new anchor.BN(material)),
-        materialsAmounts: recipe.materialsAmounts.map(
-            (amount) => new anchor.BN(amount)
-        ),
-        materialsTypes: recipe.materialsTypes.map(
-            (type) => new anchor.BN(type)
-        ),
-        statsRequired: toAnchorFriendlyBaseStats(recipe.statsRequired),
-        statsSacrificed: toAnchorFriendlyBaseStats(recipe.statsSacrificed),
-        cooldown: new anchor.BN(recipe.cooldown),
-        levelRequired: new anchor.BN(recipe.levelRequired),
-        itemRewarded: new anchor.BN(recipe.itemRewarded),
-        itemRewardedType: new anchor.BN(recipe.itemRewardedType),
-        itemRewardedAmount: new anchor.BN(recipe.itemRewardedAmount),
-    }
-}
-
-export function toNormalRecipe(recipe: AnchorFriendlyRecipe): Recipe {
-    return {
-        id: recipe.id.toNumber(),
-        name: recipe.name,
-        materials: recipe.materials
-            .map((material) => material.toNumber())
-            .filter((material) => material !== 0),
-        materialsAmounts: recipe.materialsAmounts
-            .map((amount) => amount.toNumber())
-            .filter((amount) => amount !== 0),
-        materialsTypes: recipe.materialsTypes
-            .map((type) => type.toNumber())
-            .filter((type) => type !== 0),
-        statsRequired: toNormalBaseStats(recipe.statsRequired),
-        statsSacrificed: toNormalBaseStats(recipe.statsSacrificed),
-        cooldown: recipe.cooldown.toNumber(),
-        levelRequired: recipe.levelRequired.toNumber(),
-        itemRewarded: recipe.itemRewarded.toNumber(),
-        itemRewardedType: recipe.itemRewardedType.toNumber(),
-        itemRewardedAmount: recipe.itemRewardedAmount.toNumber(),
-    }
 }
 
 export enum FORGE_RECIPE {

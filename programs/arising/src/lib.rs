@@ -75,7 +75,7 @@ pub mod arising {
     pub fn add_forge_recipe(
         ctx: Context<AddForgeRecipe>,
         _bump: u8,
-        id: u64,
+        id: u32,
         data: Recipe
     ) -> Result<()> {
         let recipe = &mut ctx.accounts.forge_recipe;
@@ -139,7 +139,7 @@ pub mod arising {
     pub fn add_craft_recipe(
         ctx: Context<AddCraftRecipe>,
         _bump: u8,
-        id: u64,
+        id: u32,
         data: Recipe
     ) -> Result<()> {
         let recipe = &mut ctx.accounts.craft_recipe;
@@ -200,7 +200,7 @@ pub mod arising {
         Ok(())
     }
 
-    pub fn add_quest(ctx: Context<AddQuest>, _bump: u8, id: u64, data: Quest) -> Result<()> {
+    pub fn add_quest(ctx: Context<AddQuest>, _bump: u8, id: u32, data: Quest) -> Result<()> {
         let quest = &mut ctx.accounts.quest;
 
         let config = &mut ctx.accounts.config;
@@ -332,7 +332,7 @@ pub mod arising {
         consume_points(mut_character, stats);
 
         // Store the recipe information for claim later
-        mut_character.forge.cooldown = now() + recipe.recipe.cooldown;
+        mut_character.forge.cooldown = now() + (recipe.recipe.cooldown as u64);
         mut_character.forge.last_task_id = recipe.recipe.id;
         mut_character.forge.last_task_claimed = false;
 
@@ -407,7 +407,7 @@ pub mod arising {
         consume_points(mut_character, stats);
 
         // Store the recipe information for claim later
-        mut_character.craft.cooldown = now() + recipe.recipe.cooldown;
+        mut_character.craft.cooldown = now() + (recipe.recipe.cooldown as u64);
         mut_character.craft.last_task_id = recipe.recipe.id;
         mut_character.craft.last_task_claimed = false;
 
@@ -458,11 +458,11 @@ pub mod arising {
         let mut_character = &mut ctx.accounts.character;
         consume_points(mut_character, &quest.stats_required);
 
-        if quest.quest_type == (QuestType::Raid as u64) {
+        if quest.quest_type == (QuestType::Raid as u16) {
             // TODO: add the seed for randomness.
         }
 
-        mut_character.quest.cooldown = now() + quest.cooldown;
+        mut_character.quest.cooldown = now() + (quest.cooldown as u64);
         mut_character.quest.last_task_id = quest.id;
         mut_character.quest.last_task_claimed = false;
 
@@ -476,6 +476,19 @@ pub mod arising {
         // Check if the character is able to claim the craft recipe
         if !is_slot_claimable(&character.quest) {
             return Err(CharacterError::NotAbleToClaimCraftRecipe.into());
+        }
+
+        let mut_character = &mut ctx.accounts.character;
+        let materials = &quest.materials_reward;
+        let amounts = &quest.materials_amounts;
+
+        if
+            quest.quest_type == (QuestType::Farm as u16) ||
+            quest.quest_type == (QuestType::Job as u16)
+        {
+            quest_rewards(mut_character, materials, amounts);
+        } else {
+            // TODO: perform fight and experience reward.
         }
 
         Ok(())
@@ -498,7 +511,7 @@ pub struct Initialize<'info> {
     #[account(
         init,
         payer = authority,
-        seeds = [CONFIG_PREFIX.as_bytes(), authority.key.as_ref()],
+        seeds = [CONFIG_PREFIX.as_bytes()],
         bump,
         space = CONFIG_ACCOUNT_SIZE
     )]

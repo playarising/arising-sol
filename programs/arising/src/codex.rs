@@ -154,8 +154,8 @@ static LEVELS: [Level; 150] = [
 ];
 
 #[inline(always)]
-pub fn get_level(experience: u64) -> u64 {
-    let mut n: u64 = 0;
+pub fn get_level(experience: u64) -> u16 {
+    let mut n: u16 = 0;
 
     loop {
         if experience >= LEVELS[n as usize].min && experience < LEVELS[n as usize].max {
@@ -175,34 +175,34 @@ struct Level {
 
 /// The size of the character stats.
 pub const BASE_STATS_SIZE: usize =
-    64 + // might
-    64 + // speed
-    64; // intellect
+    16 + // might
+    16 + // speed
+    16; // intellect
 
 /// The struct for character stats.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct BaseStats {
-    pub might: u64,
-    pub speed: u64,
-    pub intellect: u64,
+    pub might: u16,
+    pub speed: u16,
+    pub intellect: u16,
 }
 
 /// The size of the character attributes.
 pub const BASE_ATTRIBUTES_SIZE: usize =
-    64 + // atk
-    64 + // def
-    64 + // range
-    64 + // mag_atk
-    64 + // mag_def
-    64; // rate
+    16 + // atk
+    16 + // def
+    16 + // range
+    16 + // mag_atk
+    16 + // mag_def
+    16; // rate
 
 /// The struct for character attributes.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct BaseAttributes {
-    pub atk: u64,
-    pub def: u64,
-    pub range: u64,
-    pub mag_atk: u64,
-    pub mag_def: u64,
-    pub rate: u64,
+    pub atk: u16,
+    pub def: u16,
+    pub range: u16,
+    pub mag_atk: u16,
+    pub mag_def: u16,
+    pub rate: u16,
 }

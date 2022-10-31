@@ -68,8 +68,8 @@ pub fn can_assign_points(character: &Account<Character>, points: &BaseStats) -> 
 }
 
 #[inline(always)]
-pub fn get_character_assignable_points(character: &Account<Character>) -> u64 {
-    return (6 + character.level).into();
+pub fn get_character_assignable_points(character: &Account<Character>) -> u16 {
+    return 6 + character.level;
 }
 
 pub fn can_consume(character: &Account<Character>, points: &BaseStats) -> bool {
@@ -121,7 +121,7 @@ pub fn sacrifice_points(character: &mut Account<Character>, points: BaseStats) {
 
     let sum = points.might + points.speed + points.intellect;
 
-    character.sacrificed_points += sum;
+    character.sacrificed_points += sum as u32;
 
     return;
 }
@@ -208,96 +208,93 @@ pub struct CharacterAccessWithConfig<'info> {
 /// The size of the character struct for actions.
 pub const CHARACTER_SLOT_SIZE: usize =
     64 + // cooldown
-    64 + // last_task_id
+    32 + // last_task_id
     1; // last_task_claimed
 
 /// The struct for slots used for character actions.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct CharacterSlot {
     pub cooldown: u64,
-    pub last_task_id: u64,
+    pub last_task_id: u32,
     pub last_task_claimed: bool,
-}
-
-/// The size of the slot in bytes
-pub const EQUIPMENT_SLOT_SIZE: usize =
-    32 + // mint
-    1; // equiped
-
-/// One slot for the character equipment.
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct EquipmentSlot {
-    pub mint: Pubkey,
-    pub equiped: bool,
 }
 
 /// The character informationsize in bytes.
 pub const CHARACTER_EQUIPMENT_SIZE: usize =
-    EQUIPMENT_SLOT_SIZE + // helmer
-    EQUIPMENT_SLOT_SIZE + // shoulder_guards
-    EQUIPMENT_SLOT_SIZE + // arm_guards
-    EQUIPMENT_SLOT_SIZE + // hands
-    EQUIPMENT_SLOT_SIZE + // rings
-    EQUIPMENT_SLOT_SIZE + // necklace
-    EQUIPMENT_SLOT_SIZE + // chest
-    EQUIPMENT_SLOT_SIZE + // legs
-    EQUIPMENT_SLOT_SIZE + // belt
-    EQUIPMENT_SLOT_SIZE + // feet
-    EQUIPMENT_SLOT_SIZE + // cape
-    EQUIPMENT_SLOT_SIZE + // left_hand
-    EQUIPMENT_SLOT_SIZE; // right_hand
+    32 + // helmer
+    32 + // shoulder_guards
+    32 + // arm_guards
+    32 + // hands
+    32 + // rings
+    32 + // necklace
+    32 + // chest
+    32 + // legs
+    32 + // belt
+    32 + // feet
+    32 + // cape
+    32 + // left_hand
+    32; // right_hand
 
 /// The character equipment struct.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct CharacterEquipment {
-    pub helmet: EquipmentSlot,
-    pub shoulder_guards: EquipmentSlot,
-    pub arm_guards: EquipmentSlot,
-    pub hands: EquipmentSlot,
-    pub rings: EquipmentSlot,
-    pub necklace: EquipmentSlot,
-    pub chest: EquipmentSlot,
-    pub legs: EquipmentSlot,
-    pub belt: EquipmentSlot,
-    pub feet: EquipmentSlot,
-    pub cape: EquipmentSlot,
-    pub left_hand: EquipmentSlot,
-    pub right_hand: EquipmentSlot,
+    pub helmet: Pubkey,
+    pub shoulder_guards: Pubkey,
+    pub arm_guards: Pubkey,
+    pub hands: Pubkey,
+    pub rings: Pubkey,
+    pub necklace: Pubkey,
+    pub chest: Pubkey,
+    pub legs: Pubkey,
+    pub belt: Pubkey,
+    pub feet: Pubkey,
+    pub cape: Pubkey,
+    pub left_hand: Pubkey,
+    pub right_hand: Pubkey,
+}
+
+const CHARACTER_RESOURCES_SIZE: usize =
+    544 + // basic
+    544; // raw
+
+/// The character equipment struct.
+#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+pub struct CharacterResources {
+    pub basic: [u32; 17],
+    pub raw: [u32; 17],
 }
 
 /// The size of the character metadata in bytes.
 pub const CHARACTER_ACCOUNT_SIZE: usize =
     8 + // discriminator
-    64 + // level
+    16 + // level
     32 + // mint
     BASE_STATS_SIZE + // base_stats
     BASE_STATS_SIZE + // pool_stats
     64 + // experience
     64 + // last_refresh
     64 + // last_refresh_with_refresher
-    64 + // sacrificed_points
+    32 + // sacrificed_points
     CHARACTER_SLOT_SIZE + // forge
     CHARACTER_SLOT_SIZE + // craft
-    CHARACTER_SLOT_SIZE + // craft_upgrades
+    CHARACTER_SLOT_SIZE + // quest
     CHARACTER_EQUIPMENT_SIZE + // equipment
-    1024 + // raw_materials
-    960; // basic_materials
+    CHARACTER_RESOURCES_SIZE; // resources
 
 /// The full metadata information for an Arising character.
 #[account]
 pub struct Character {
-    pub level: u64,
+    pub level: u16,
     pub mint: Pubkey,
     pub base_stats: BaseStats,
     pub pool_stats: BaseStats,
     pub experience: u64,
     pub last_refresh: u64,
     pub last_refresh_with_refresher: u64,
-    pub sacrificed_points: u64,
+    pub sacrificed_points: u32,
     pub forge: CharacterSlot,
     pub craft: CharacterSlot,
     pub quest: CharacterSlot,
     pub equipment: CharacterEquipment,
-    pub raw_materials: [u64; 16],
-    pub basic_materials: [u64; 15],
+    pub resources: CharacterResources,
 }

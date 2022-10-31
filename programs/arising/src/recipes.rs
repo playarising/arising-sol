@@ -12,20 +12,20 @@ const FORGE_RECIPE_PREFIX: &str = "arising_forge_recipe";
 #[inline(always)]
 pub fn forge_reward(
     character: &mut Account<Character>,
-    material: u64,
-    amount: u64,
-    material_type: u64
+    material: u32,
+    amount: u32,
+    material_type: u16
 ) {
     if material == 0 {
         return;
     }
 
-    if material_type == (ResourceType::Basic as u64) {
-        character.basic_materials[(material as usize) - 1] += amount;
+    if material_type == (ResourceType::Basic as u16) {
+        character.resources.basic[(material as usize) - 1] += amount;
     }
 
-    if material_type == (ResourceType::Raw as u64) {
-        character.raw_materials[(material as usize) - 1] += amount;
+    if material_type == (ResourceType::Raw as u16) {
+        character.resources.raw[(material as usize) - 1] += amount;
     }
 
     return;
@@ -34,9 +34,9 @@ pub fn forge_reward(
 #[inline(always)]
 pub fn consume_materials(
     character: &mut Account<Character>,
-    materials: &[u64; 10],
-    amounts: &[u64; 10],
-    types: &[u64; 10]
+    materials: &[u32; 10],
+    amounts: &[u32; 10],
+    types: &[u16; 10]
 ) {
     let mut i: usize = 0;
     while i < 10 {
@@ -48,12 +48,12 @@ pub fn consume_materials(
             continue;
         }
 
-        if material_type == (ResourceType::Basic as u64) {
-            character.basic_materials[(material as usize) - 1] -= amount;
+        if material_type == (ResourceType::Basic as u16) {
+            character.resources.basic[(material as usize) - 1] -= amount;
         }
 
-        if material_type == (ResourceType::Raw as u64) {
-            character.raw_materials[(material as usize) - 1] -= amount;
+        if material_type == (ResourceType::Raw as u16) {
+            character.resources.raw[(material as usize) - 1] -= amount;
         }
 
         i += 1;
@@ -63,9 +63,9 @@ pub fn consume_materials(
 #[inline(always)]
 pub fn has_enough_materials(
     character: &Account<Character>,
-    materials: &[u64; 10],
-    amounts: &[u64; 10],
-    types: &[u64; 10]
+    materials: &[u32; 10],
+    amounts: &[u32; 10],
+    types: &[u16; 10]
 ) -> bool {
     let mut i: usize = 0;
     while i < 10 {
@@ -77,14 +77,14 @@ pub fn has_enough_materials(
             continue;
         }
 
-        let mut material_amount: u64 = 0;
+        let mut material_amount: u32 = 0;
 
-        if material_type == (ResourceType::Basic as u64) {
-            material_amount = character.basic_materials[(material as usize) - 1];
+        if material_type == (ResourceType::Basic as u16) {
+            material_amount = character.resources.basic[(material as usize) - 1];
         }
 
-        if material_type == (ResourceType::Raw as u64) {
-            material_amount = character.raw_materials[(material as usize) - 1];
+        if material_type == (ResourceType::Raw as u16) {
+            material_amount = character.resources.raw[(material as usize) - 1];
         }
 
         if amount_required > material_amount {
@@ -127,11 +127,11 @@ pub struct UpdateForgeRecipe<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(bump: u8, id: u64)]
+#[instruction(bump: u8, id: u32)]
 pub struct AddForgeRecipe<'info> {
     #[account(mut,
         constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority,
-        constraint = (config.forge_recipes + 1) == id @ ForgeError::InvalidID
+        constraint = (config.forge_recipes + 1) == id.into() @ ForgeError::InvalidID
     )]
     payer: Signer<'info>,
 
@@ -180,11 +180,11 @@ pub struct UpdateCraftRecipe<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(bump: u8, id: u64)]
+#[instruction(bump: u8, id: u32)]
 pub struct AddCraftRecipe<'info> {
     #[account(mut,
         constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority,
-        constraint = (config.craft_recipes + 1) == id @ CraftError::InvalidID
+        constraint = (config.craft_recipes + 1) == id.into() @ CraftError::InvalidID
     )]
     payer: Signer<'info>,
 
@@ -211,35 +211,35 @@ enum ResourceType {
 /// The size of a craft and forge recipe.
 pub const RECIPE_SIZE: usize =
     8 + // discriminator
-    64 + // id
+    32 + // id
     24 + // name
-    640 + // materials
-    640 + // materials_amounts
-    640 + // materials_types
+    320 + // materials
+    320 + // materials_amounts
+    150 + // materials_types
     BASE_STATS_SIZE + // stats_required
     BASE_STATS_SIZE + // stats_sacrificed
-    64 + // cooldown
-    64 + // level_required
-    64 + // item_rewarded
-    64 + // item_rewarded_amount
-    64 + // item_rewarded_type
+    32 + // cooldown
+    16 + // level_required
+    32 + // item_rewarded
+    32 + // item_rewarded_amount
+    16 + // item_rewarded_type
     1; // available
 
 /// The full metadata information for a recipe.
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct Recipe {
-    pub id: u64,
+    pub id: u32,
     pub name: String,
-    pub materials: [u64; 10],
-    pub materials_amounts: [u64; 10],
-    pub materials_types: [u64; 10],
+    pub materials: [u32; 10],
+    pub materials_amounts: [u32; 10],
+    pub materials_types: [u16; 10],
     pub stats_required: BaseStats,
     pub stats_sacrificed: BaseStats,
-    pub cooldown: u64,
-    pub level_required: u64,
-    pub item_rewarded: u64,
-    pub item_rewarded_amount: u64,
-    pub item_rewarded_type: u64,
+    pub cooldown: u32,
+    pub level_required: u16,
+    pub item_rewarded: u32,
+    pub item_rewarded_amount: u32,
+    pub item_rewarded_type: u16,
     pub available: bool,
 }
 

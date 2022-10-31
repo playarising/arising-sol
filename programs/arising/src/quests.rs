@@ -8,6 +8,26 @@ use crate::characters::*;
 
 const QUESTS_PREFIX: &str = "arising_quest";
 
+#[inline(always)]
+pub fn quest_rewards(
+    character: &mut Account<Character>,
+    materials: &[u32; 10],
+    amounts: &[u32; 10]
+) {
+    let mut i: usize = 0;
+    while i < 10 {
+        let material = materials[i];
+        let amount = amounts[i];
+
+        if material == 0 {
+            continue;
+        }
+
+        character.resources.raw[(material as usize) - 1] += amount;
+
+        i += 1;
+    }
+}
 
 #[derive(Accounts)]
 pub struct QuestAccess<'info> {
@@ -71,17 +91,17 @@ pub enum QuestType {
 /// The size of a quest.
 pub const QUEST_SIZE: usize =
     8 + // discriminator
-    64 + // id
+    32 + // id
     24 + // name
     24 + // description
-    64 + // quest_type
+    16 + // quest_type
     BASE_STATS_SIZE + // stats_required
-    64 + // cooldown
-    64 + // level_required
-    640 + // materials_reward
-    640 + // materials_amounts
-    64 + // mob_experience
-    64 + // mob_level
+    32 + // cooldown
+    16 + // level_required
+    32 + // materials_reward
+    32 + // materials_amounts
+    32 + // mob_experience
+    16 + // mob_level
     BASE_STATS_SIZE + // mob_base_stats
     BASE_ATTRIBUTES_SIZE + // mob_base_attributes
     1; // available
@@ -89,17 +109,17 @@ pub const QUEST_SIZE: usize =
 /// The full metadata information for a quest.
 #[account]
 pub struct Quest {
-    pub id: u64,
+    pub id: u32,
     pub name: String,
     pub description: String,
-    pub quest_type: u64,
+    pub quest_type: u16,
     pub stats_required: BaseStats,
-    pub cooldown: u64,
-    pub level_required: u64,
-    pub materials_reward: [u64; 10],
-    pub materials_amounts: [u64; 10],
-    pub mob_experience: u64,
-    pub mob_level: u64,
+    pub cooldown: u32,
+    pub level_required: u16,
+    pub materials_reward: [u32; 10],
+    pub materials_amounts: [u32; 10],
+    pub mob_experience: u32,
+    pub mob_level: u16,
     pub mob_base_stats: BaseStats,
     pub mob_base_attributes: BaseAttributes,
     pub available: bool,

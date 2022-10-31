@@ -2,18 +2,8 @@ import * as anchor from '@project-serum/anchor'
 import { Program } from '@project-serum/anchor'
 import { LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { expect } from 'chai'
-import {
-    QUESTS_DATA,
-    toAnchorFriendlyQuest,
-    toNormalQuest,
-} from '../data/quests'
-import {
-    CRAFT_RECIPES_DATA,
-    FORGE_RECIPES_DATA,
-    toAnchorFriendlyRecipe,
-    toNormalRecipe,
-} from '../data/recipes'
-import { toAnchorFriendlyBaseStats, toNormalBaseStats } from '../data/stats'
+import { QUESTS_DATA } from '../data/quests'
+import { CRAFT_RECIPES_DATA, FORGE_RECIPES_DATA } from '../data/recipes'
 import { Arising } from '../target/types/arising'
 import {
     getProgramCharacterAccount,
@@ -26,9 +16,10 @@ import {
 import { mockMintNFT } from './utils'
 
 describe('arising', () => {
+    const payer = anchor.web3.Keypair.generate()
+
     anchor.setProvider(anchor.AnchorProvider.env())
 
-    const payer = anchor.web3.Keypair.generate()
     const program = anchor.workspace.Arising as Program<Arising>
     const authority = program.provider
 
@@ -56,7 +47,7 @@ describe('arising', () => {
 
     it('Initialize', async () => {
         const { account: config_program_address, bump } =
-            await getProgramConfigAccount(authority.publicKey, program)
+            await getProgramConfigAccount(program)
 
         await program.methods
             .initialize(bump)
@@ -81,8 +72,8 @@ describe('arising', () => {
     })
 
     it('Pause and resume correctly', async () => {
-        const { account: config_program_address } =
-            await getProgramConfigAccount(authority.publicKey, program)
+        const { account: config_program_address, bump } =
+            await getProgramConfigAccount(program)
 
         await program.methods
             .setPaused(false)
@@ -113,7 +104,7 @@ describe('arising', () => {
 
     it('Add a fake mint and fetch the information', async () => {
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority.publicKey, program)
+            await getProgramConfigAccount(program)
 
         const { account: mint1_address, bump: bump1 } =
             await getProgramCharacterAccount(mint1.publicKey, program)
@@ -173,8 +164,6 @@ describe('arising', () => {
     it('Set the initial stats for the initial mints', async () => {
         const assignStats = { might: 2, speed: 2, intellect: 2 }
 
-        const anchorAssignStats = toAnchorFriendlyBaseStats(assignStats)
-
         const { account: mint1_address } = await getProgramCharacterAccount(
             mint1.publicKey,
             program
@@ -184,7 +173,7 @@ describe('arising', () => {
             await getTokenWalletAccount(authority.publicKey, mint1.publicKey)
 
         await program.methods
-            .assignStatsCharacter(anchorAssignStats)
+            .assignStatsCharacter(assignStats)
             .accounts({
                 payer: authority.publicKey,
                 character: mint1_address,
@@ -195,8 +184,9 @@ describe('arising', () => {
         const character1 = await program.account.character.fetchNullable(
             mint1_address
         )
-        expect(toNormalBaseStats(character1.baseStats)).to.deep.eq(assignStats)
-        expect(toNormalBaseStats(character1.poolStats)).to.deep.eq(assignStats)
+
+        expect(character1.baseStats).to.deep.eq(assignStats)
+        expect(character1.poolStats).to.deep.eq(assignStats)
 
         const { account: mint2_address } = await getProgramCharacterAccount(
             mint2.publicKey,
@@ -207,7 +197,7 @@ describe('arising', () => {
             await getTokenWalletAccount(authority.publicKey, mint2.publicKey)
 
         await program.methods
-            .assignStatsCharacter(anchorAssignStats)
+            .assignStatsCharacter(assignStats)
             .accounts({
                 payer: authority.publicKey,
                 character: mint2_address,
@@ -218,8 +208,8 @@ describe('arising', () => {
         const character2 = await program.account.character.fetchNullable(
             mint2_address
         )
-        expect(toNormalBaseStats(character2.baseStats)).to.deep.eq(assignStats)
-        expect(toNormalBaseStats(character2.poolStats)).to.deep.eq(assignStats)
+        expect(character2.baseStats).to.deep.eq(assignStats)
+        expect(character2.poolStats).to.deep.eq(assignStats)
 
         const { account: mint3_address } = await getProgramCharacterAccount(
             mint3.publicKey,
@@ -230,7 +220,7 @@ describe('arising', () => {
             await getTokenWalletAccount(authority.publicKey, mint3.publicKey)
 
         await program.methods
-            .assignStatsCharacter(anchorAssignStats)
+            .assignStatsCharacter(assignStats)
             .accounts({
                 payer: authority.publicKey,
                 character: mint3_address,
@@ -241,15 +231,15 @@ describe('arising', () => {
         const character3 = await program.account.character.fetchNullable(
             mint3_address
         )
-        expect(toNormalBaseStats(character3.baseStats)).to.deep.eq(assignStats)
-        expect(toNormalBaseStats(character3.poolStats)).to.deep.eq(assignStats)
+        expect(character3.baseStats).to.deep.eq(assignStats)
+        expect(character3.poolStats).to.deep.eq(assignStats)
     })
 
     it('Add forge recipes', async () => {
         const keys = Object.keys(FORGE_RECIPES_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority.publicKey, program)
+            await getProgramConfigAccount(program)
 
         for (const key of keys) {
             const recipe = FORGE_RECIPES_DATA[key]
@@ -257,11 +247,8 @@ describe('arising', () => {
             const { account: recipe_account, bump } =
                 await getProgramForgeRecipeAccount(recipe, program)
 
-            const anchorRecipe = toAnchorFriendlyRecipe(recipe)
-
             await program.methods
-                // @ts-ignore
-                .addForgeRecipe(bump, new anchor.BN(recipe.id), anchorRecipe)
+                .addForgeRecipe(bump, recipe.id, recipe)
                 .accounts({
                     config: config_program_address,
                     payer: authority.publicKey,
@@ -275,7 +262,7 @@ describe('arising', () => {
         const keys = Object.keys(CRAFT_RECIPES_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority.publicKey, program)
+            await getProgramConfigAccount(program)
 
         for (const key of keys) {
             const recipe = CRAFT_RECIPES_DATA[key]
@@ -283,11 +270,8 @@ describe('arising', () => {
             const { account: recipe_account, bump } =
                 await getProgramCraftRecipeAccount(recipe, program)
 
-            const anchorRecipe = toAnchorFriendlyRecipe(recipe)
-
             await program.methods
-                // @ts-ignore
-                .addCraftRecipe(bump, new anchor.BN(recipe.id), anchorRecipe)
+                .addCraftRecipe(bump, recipe.id, recipe)
                 .accounts({
                     config: config_program_address,
                     payer: authority.publicKey,
@@ -301,7 +285,7 @@ describe('arising', () => {
         const keys = Object.keys(QUESTS_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority.publicKey, program)
+            await getProgramConfigAccount(program)
 
         for (const key of keys) {
             const quest = QUESTS_DATA[key]
@@ -309,11 +293,8 @@ describe('arising', () => {
             const { account: quest_account, bump } =
                 await getProgramQuestAccount(quest, program)
 
-            const anchorQuest = toAnchorFriendlyQuest(quest)
-
             await program.methods
-                // @ts-ignore
-                .addQuest(bump, new anchor.BN(quest.id), anchorQuest)
+                .addQuest(bump, quest.id, quest)
                 .accounts({
                     config: config_program_address,
                     payer: authority.publicKey,
@@ -327,7 +308,7 @@ describe('arising', () => {
         const keys = Object.keys(FORGE_RECIPES_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority.publicKey, program)
+            await getProgramConfigAccount(program)
 
         for (const key of keys) {
             const recipe = FORGE_RECIPES_DATA[key]
@@ -339,7 +320,7 @@ describe('arising', () => {
                 recipe_account
             )
 
-            expect(toNormalRecipe(anchorRecipe.recipe)).to.deep.equal(recipe)
+            expect(anchorRecipe.recipe).to.deep.equal(recipe)
             expect(anchorRecipe.recipe.available).to.eq(false)
 
             await program.methods
@@ -358,12 +339,11 @@ describe('arising', () => {
             expect(anchorRecipe.recipe.available).to.eq(true)
 
             const newName = 'New Recipe Name'
-            const anchorNewData = toAnchorFriendlyRecipe(recipe)
-            anchorNewData.name = newName
+            const newRecipe = recipe
+            newRecipe.name = newName
 
             await program.methods
-                // @ts-ignore
-                .updateForgeRecipe(anchorNewData)
+                .updateForgeRecipe(newRecipe)
                 .accounts({
                     config: config_program_address,
                     payer: authority.publicKey,
@@ -377,11 +357,10 @@ describe('arising', () => {
                 recipe_account
             )
 
-            expect(toNormalRecipe(anchorRecipe.recipe)).to.deep.eq(recipe)
+            expect(anchorRecipe.recipe).to.deep.eq(recipe)
 
             await program.methods
-                // @ts-ignore
-                .updateForgeRecipe(toAnchorFriendlyRecipe(recipe))
+                .updateForgeRecipe(recipe)
                 .accounts({
                     config: config_program_address,
                     payer: authority.publicKey,
@@ -395,7 +374,7 @@ describe('arising', () => {
         const keys = Object.keys(CRAFT_RECIPES_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority.publicKey, program)
+            await getProgramConfigAccount(program)
 
         for (const key of keys) {
             const recipe = CRAFT_RECIPES_DATA[key]
@@ -407,7 +386,7 @@ describe('arising', () => {
                 recipe_account
             )
 
-            expect(toNormalRecipe(anchorRecipe.recipe)).to.deep.equal(recipe)
+            expect(anchorRecipe.recipe).to.deep.equal(recipe)
             expect(anchorRecipe.recipe.available).to.eq(false)
 
             await program.methods
@@ -426,12 +405,11 @@ describe('arising', () => {
             expect(anchorRecipe.recipe.available).to.eq(true)
 
             const newName = 'New Recipe Name'
-            const anchorNewData = toAnchorFriendlyRecipe(recipe)
-            anchorNewData.name = newName
+            const newRecipe = recipe
+            newRecipe.name = newName
 
             await program.methods
-                // @ts-ignore
-                .updateCraftRecipe(anchorNewData)
+                .updateCraftRecipe(newRecipe)
                 .accounts({
                     config: config_program_address,
                     payer: authority.publicKey,
@@ -445,11 +423,10 @@ describe('arising', () => {
                 recipe_account
             )
 
-            expect(toNormalRecipe(anchorRecipe.recipe)).to.deep.eq(recipe)
+            expect(anchorRecipe.recipe).to.deep.eq(recipe)
 
             await program.methods
-                // @ts-ignore
-                .updateCraftRecipe(toAnchorFriendlyRecipe(recipe))
+                .updateCraftRecipe(recipe)
                 .accounts({
                     config: config_program_address,
                     payer: authority.publicKey,
@@ -463,7 +440,7 @@ describe('arising', () => {
         const keys = Object.keys(QUESTS_DATA)
 
         const { account: config_program_address } =
-            await getProgramConfigAccount(authority.publicKey, program)
+            await getProgramConfigAccount(program)
 
         for (const key of keys) {
             const quest = QUESTS_DATA[key]
@@ -475,7 +452,7 @@ describe('arising', () => {
 
             let anchorQuest = await program.account.quest.fetch(quest_account)
 
-            expect(toNormalQuest(anchorQuest)).to.deep.equal(quest)
+            expect(anchorQuest).to.deep.equal(quest)
             expect(anchorQuest.available).to.eq(false)
 
             await program.methods
@@ -492,12 +469,11 @@ describe('arising', () => {
             expect(anchorQuest.available).to.eq(true)
 
             const newName = 'New Quest Name'
-            const anchorNewData = toAnchorFriendlyQuest(quest)
-            anchorNewData.name = newName
+            const newQuest = quest
+            newQuest.name = newName
 
             await program.methods
-                // @ts-ignore
-                .updateQuest(anchorNewData)
+                .updateQuest(newQuest)
                 .accounts({
                     config: config_program_address,
                     payer: authority.publicKey,
@@ -509,11 +485,10 @@ describe('arising', () => {
 
             anchorQuest = await program.account.quest.fetch(quest_account)
 
-            expect(toNormalQuest(anchorQuest)).to.deep.eq(quest)
+            expect(anchorQuest).to.deep.eq(quest)
 
             await program.methods
-                // @ts-ignore
-                .updateQuest(toAnchorFriendlyQuest(quest))
+                .updateQuest(quest)
                 .accounts({
                     config: config_program_address,
                     payer: authority.publicKey,
