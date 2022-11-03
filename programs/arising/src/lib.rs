@@ -3,14 +3,14 @@ mod utils;
 mod characters;
 mod errors;
 mod codex;
-mod recipes;
+mod forge;
 mod quests;
 
 use anchor_lang::prelude::*;
 
 use config::*;
 use characters::*;
-use recipes::*;
+use forge::*;
 use quests::*;
 use codex::*;
 use errors::*;
@@ -136,70 +136,6 @@ pub mod arising {
         Ok(())
     }
 
-    pub fn add_craft_recipe(
-        ctx: Context<AddCraftRecipe>,
-        _bump: u8,
-        id: u32,
-        data: Recipe
-    ) -> Result<()> {
-        let recipe = &mut ctx.accounts.craft_recipe;
-
-        let config = &mut ctx.accounts.config;
-
-        msg!("Adding craft recipe {} with id {}", data.name, id);
-
-        recipe.recipe.id = id;
-        recipe.recipe.name = data.name;
-        recipe.recipe.materials = data.materials;
-        recipe.recipe.materials_amounts = data.materials_amounts;
-        recipe.recipe.materials_types = data.materials_types;
-        recipe.recipe.stats_required = data.stats_required;
-        recipe.recipe.stats_sacrificed = data.stats_sacrificed;
-        recipe.recipe.cooldown = data.cooldown;
-        recipe.recipe.level_required = data.level_required;
-        recipe.recipe.item_rewarded = data.item_rewarded;
-        recipe.recipe.item_rewarded_type = data.item_rewarded_type;
-        recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
-        recipe.recipe.available = false;
-
-        config.craft_recipes += 1;
-
-        Ok(())
-    }
-
-    pub fn update_craft_recipe_availability(
-        ctx: Context<UpdateCraftRecipe>,
-        available: bool
-    ) -> Result<()> {
-        let recipe = &mut ctx.accounts.craft_recipe;
-
-        msg!("Updating craft recipe id {} availability to {}", recipe.recipe.id, available);
-
-        recipe.recipe.available = available;
-
-        Ok(())
-    }
-
-    pub fn update_craft_recipe(ctx: Context<UpdateCraftRecipe>, data: Recipe) -> Result<()> {
-        let recipe = &mut ctx.accounts.craft_recipe;
-
-        msg!("Updating craft recipe id {}", recipe.recipe.id);
-
-        recipe.recipe.name = data.name;
-        recipe.recipe.materials = data.materials;
-        recipe.recipe.materials_amounts = data.materials_amounts;
-        recipe.recipe.materials_types = data.materials_types;
-        recipe.recipe.stats_required = data.stats_required;
-        recipe.recipe.stats_sacrificed = data.stats_sacrificed;
-        recipe.recipe.cooldown = data.cooldown;
-        recipe.recipe.level_required = data.level_required;
-        recipe.recipe.item_rewarded = data.item_rewarded;
-        recipe.recipe.item_rewarded_type = data.item_rewarded_type;
-        recipe.recipe.item_rewarded_amount = data.item_rewarded_amount;
-
-        Ok(())
-    }
-
     pub fn add_quest(ctx: Context<AddQuest>, _bump: u8, id: u32, data: Quest) -> Result<()> {
         let quest = &mut ctx.accounts.quest;
 
@@ -258,7 +194,7 @@ pub mod arising {
         Ok(())
     }
 
-    pub fn perform_refresh(ctx: Context<CharacterAccessWithConfig>) -> Result<()> {
+    pub fn perform_refresh(ctx: Context<CharacterAccess>) -> Result<()> {
         let character = &ctx.accounts.character;
         let config = &ctx.accounts.config;
 
@@ -273,7 +209,7 @@ pub mod arising {
         return Ok(());
     }
 
-    pub fn perform_refresh_with_token(ctx: Context<CharacterAccessWithConfig>) -> Result<()> {
+    pub fn perform_refresh_with_token(ctx: Context<CharacterAccess>) -> Result<()> {
         let character = &ctx.accounts.character;
         let config = &ctx.accounts.config;
 
@@ -359,75 +295,6 @@ pub mod arising {
 
         // Modify the character forge slot to be able to create another recipe
         mut_character.forge.last_task_claimed = true;
-
-        Ok(())
-    }
-
-    pub fn start_craft(ctx: Context<CraftAccess>) -> Result<()> {
-        let recipe = &ctx.accounts.craft_recipe;
-        let character = &ctx.accounts.character;
-
-        // Check if the craft recipe is available globally.
-        if !recipe.recipe.available {
-            return Err(CraftError::NotAvailable.into());
-        }
-
-        // Check if the character is able to craft
-        if !is_slot_available(&character.craft) {
-            return Err(CharacterError::NotAbleToCraftRecipe.into());
-        }
-
-        // Check if the character has enough level for the recipe
-        if recipe.recipe.level_required > character.level {
-            return Err(CharacterError::NotEnoughLevel.into());
-        }
-
-        // Check if the character can consume points of the pool
-        if !can_consume(character, &recipe.recipe.stats_required) {
-            return Err(CharacterError::NotEnoughPoolPointsToConsume.into());
-        }
-
-        let materials = &recipe.recipe.materials;
-        let amounts = &recipe.recipe.materials_amounts;
-        let types = &recipe.recipe.materials_types;
-
-        // Check if the character can consume the materials for the recipe
-        if !has_enough_materials(character, materials, amounts, types) {
-            return Err(CharacterError::NotEnoughResources.into());
-        }
-
-        let mut_character = &mut ctx.accounts.character;
-
-        // Consume the recipe material
-        consume_materials(mut_character, materials, amounts, types);
-
-        let stats = &recipe.recipe.stats_required;
-
-        // Consume the pool points
-        consume_points(mut_character, stats);
-
-        // Store the recipe information for claim later
-        mut_character.craft.cooldown = now() + (recipe.recipe.cooldown as u64);
-        mut_character.craft.last_task_id = recipe.recipe.id;
-        mut_character.craft.last_task_claimed = false;
-
-        Ok(())
-    }
-
-    pub fn claim_craft(ctx: Context<CraftAccess>) -> Result<()> {
-        let character = &ctx.accounts.character;
-
-        // Check if the character is able to claim the craft recipe
-        if !is_slot_claimable(&character.craft) {
-            return Err(CharacterError::NotAbleToClaimCraftRecipe.into());
-        }
-
-        // Reward the character and create an item
-        // TODO: Craft reward.
-
-        // Modify the character craft slot to be able to create another recipe
-        let mut_character = &mut ctx.accounts.character;
-        mut_character.craft.last_task_claimed = true;
 
         Ok(())
     }

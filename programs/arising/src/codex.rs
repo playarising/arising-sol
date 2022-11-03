@@ -206,3 +206,43 @@ pub struct BaseAttributes {
     pub mag_def: u16,
     pub rate: u16,
 }
+
+pub enum ResourceType {
+    Raw = 1,
+    Basic,
+}
+
+/// The size of a craft and forge recipe.
+pub const RECIPE_SIZE: usize =
+    8 + // discriminator
+    32 + // id
+    24 + // name
+    320 + // materials
+    320 + // materials_amounts
+    150 + // materials_types
+    BASE_STATS_SIZE + // stats_required
+    BASE_STATS_SIZE + // stats_sacrificed
+    32 + // cooldown
+    16 + // level_required
+    32 + // item_rewarded
+    32 + // item_rewarded_amount
+    16 + // item_rewarded_type
+    1; // available
+
+/// The full metadata information for a recipe.
+#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+pub struct Recipe {
+    pub id: u32,
+    pub name: String,
+    pub materials: [u32; 10],
+    pub materials_amounts: [u32; 10],
+    pub materials_types: [u16; 10],
+    pub stats_required: BaseStats,
+    pub stats_sacrificed: BaseStats,
+    pub cooldown: u32,
+    pub level_required: u16,
+    pub item_rewarded: u32,
+    pub item_rewarded_amount: u32,
+    pub item_rewarded_type: u16,
+    pub available: bool,
+}

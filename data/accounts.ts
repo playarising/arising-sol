@@ -12,13 +12,17 @@ import { Recipe } from './recipes'
 import { QuestData } from './quests'
 
 const CONFIG_PREFIX = 'arising_config_account'
-const CHARACTER_PREFIX = 'arising_character_account'
 const FORGE_RECIPE_PREFIX = 'arising_forge_recipe'
 const CRAFT_RECIPE_PREFIX = 'arsing_craft'
 const QUEST_PREFIX = 'arising_quest'
 
 const METADATA_PREFIX = 'metadata'
 const MASTER_EDITION_PREFIX = 'edition'
+
+const CHARACTER_PREFIX = 'arising_character_account'
+const CHARACTER_MATERIAL_PREFIX = 'arising_character_materials_account'
+const CHARACTER_SLOTS_PREFIX = 'arising_character_slots_account'
+const CHARACTER_EQUIPMENT_PREFIX = 'arising_character_equipment_account'
 
 export const TOKEN_METADATA_PROGRAM_ID = new PublicKey(TOKEN_METADATA_PROGRAM)
 
@@ -41,6 +45,45 @@ export const getProgramCharacterAccount = async (
 ): Promise<{ account: PublicKey; bump: number }> => {
     const [account, bump] = await PublicKey.findProgramAddress(
         [Buffer.from(CHARACTER_PREFIX), mint.toBuffer()],
+        program.programId
+    )
+
+    return { account, bump }
+}
+
+// Returns the program character material account from a mint
+export const getProgramCharacterMaterialsAccount = async (
+    mint: PublicKey,
+    program: Program<Arising>
+): Promise<{ account: PublicKey; bump: number }> => {
+    const [account, bump] = await PublicKey.findProgramAddress(
+        [Buffer.from(CHARACTER_MATERIAL_PREFIX), mint.toBuffer()],
+        program.programId
+    )
+
+    return { account, bump }
+}
+
+// Returns the program character slots account from a mint
+export const getProgramCharacterSlotsAccount = async (
+    mint: PublicKey,
+    program: Program<Arising>
+): Promise<{ account: PublicKey; bump: number }> => {
+    const [account, bump] = await PublicKey.findProgramAddress(
+        [Buffer.from(CHARACTER_SLOTS_PREFIX), mint.toBuffer()],
+        program.programId
+    )
+
+    return { account, bump }
+}
+
+// Returns the program character equipment account from a mint
+export const getProgramCharacterEquipmentAccount = async (
+    mint: PublicKey,
+    program: Program<Arising>
+): Promise<{ account: PublicKey; bump: number }> => {
+    const [account, bump] = await PublicKey.findProgramAddress(
+        [Buffer.from(CHARACTER_EQUIPMENT_PREFIX), mint.toBuffer()],
         program.programId
     )
 

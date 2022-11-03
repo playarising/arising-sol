@@ -15,14 +15,10 @@ pub enum CharacterError {
     RefreshNotAvailable,
     #[msg("Character: character not able to forge a recipe now")]
     NotAbleToForgeRecipe,
-    #[msg("Character: character not able to craft a recipe now")]
-    NotAbleToCraftRecipe,
     #[msg("Character: character not able to start a quest")]
     NotAbleToQuest,
     #[msg("Character: character not able to claim the forge recipe now")]
     NotAbleToClaimForgeRecipe,
-    #[msg("Character: character not able to claim the craft recipe now")]
-    NotAbleToClaimCraftRecipe,
     #[msg("Character: character not able to claim the quest now")]
     NotAbleToClaimQuest,
     #[msg("Character: not enough resources to perform the task")]
@@ -35,15 +31,6 @@ pub enum ForgeError {
     #[msg("Forge: recipe is not available.")]
     NotAvailable,
     #[msg("Forge: invalid forge recipe ID.")]
-    InvalidID,
-}
-
-/// Craft context errors
-#[error_code]
-pub enum CraftError {
-    #[msg("Craft: recipe is not available.")]
-    NotAvailable,
-    #[msg("Craft: invalid craft recipe ID.")]
     InvalidID,
 }
 

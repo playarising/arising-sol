@@ -2,24 +2,12 @@ import * as anchor from '@project-serum/anchor'
 import { Program } from '@project-serum/anchor'
 import { LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { expect } from 'chai'
-import {
-    MockFarmQuest,
-    MockJobQuest,
-    MockRaidQuest,
-    QUESTS,
-    QUESTS_DATA,
-} from '../data/quests'
-import {
-    CRAFT_RECIPES_DATA,
-    FORGE_RECIPES_DATA,
-    MockCraftRecipe,
-    MockForgeRecipe,
-} from '../data/recipes'
+import { MockFarmQuest, MockJobQuest, MockRaidQuest } from '../data/quests'
+import { MockForgeRecipe } from '../data/recipes'
 import { Arising } from '../target/types/arising'
 import {
     getProgramCharacterAccount,
     getProgramConfigAccount,
-    getProgramCraftRecipeAccount,
     getProgramForgeRecipeAccount,
     getProgramQuestAccount,
     getTokenWalletAccount,
@@ -248,8 +236,6 @@ describe('arising', () => {
     })
 
     it('Add mock forge recipe', async () => {
-        const keys = Object.keys(FORGE_RECIPES_DATA)
-
         const { account: config_program_address } =
             await getProgramConfigAccount(program)
 
@@ -264,27 +250,6 @@ describe('arising', () => {
                 config: config_program_address,
                 payer: authority.publicKey,
                 forgeRecipe: recipe_account,
-            })
-            .rpc()
-    })
-
-    it('Add mock craft recipe', async () => {
-        const keys = Object.keys(CRAFT_RECIPES_DATA)
-
-        const { account: config_program_address } =
-            await getProgramConfigAccount(program)
-
-        const recipe = MockCraftRecipe()
-
-        const { account: recipe_account, bump } =
-            await getProgramCraftRecipeAccount(recipe, program)
-
-        await program.methods
-            .addCraftRecipe(bump, recipe.id, recipe)
-            .accounts({
-                config: config_program_address,
-                payer: authority.publicKey,
-                craftRecipe: recipe_account,
             })
             .rpc()
     })
@@ -310,7 +275,7 @@ describe('arising', () => {
         }
     })
 
-    it('Fetch all forge recipes modify them and compare', async () => {
+    it('Fetch mock forge recipe modify them and compare', async () => {
         const { account: config_program_address } =
             await getProgramConfigAccount(program)
 
@@ -374,71 +339,7 @@ describe('arising', () => {
             .rpc()
     })
 
-    it('Fetch all craft recipes modify them and compare', async () => {
-        const { account: config_program_address } =
-            await getProgramConfigAccount(program)
-
-        const recipe = MockCraftRecipe()
-
-        const { account: recipe_account } = await getProgramCraftRecipeAccount(
-            recipe,
-            program
-        )
-
-        let anchorRecipe = await program.account.craftRecipe.fetch(
-            recipe_account
-        )
-
-        recipe.available = false
-
-        expect(anchorRecipe.recipe).to.deep.equal(recipe)
-        expect(anchorRecipe.recipe.available).to.eq(false)
-
-        await program.methods
-            .updateCraftRecipeAvailability(true)
-            .accounts({
-                config: config_program_address,
-                payer: authority.publicKey,
-                craftRecipe: recipe_account,
-            })
-            .rpc()
-
-        anchorRecipe = await program.account.craftRecipe.fetch(recipe_account)
-
-        expect(anchorRecipe.recipe.available).to.eq(true)
-
-        const newName = 'New Recipe Name'
-        const newRecipe = recipe
-        newRecipe.name = newName
-
-        await program.methods
-            .updateCraftRecipe(newRecipe)
-            .accounts({
-                config: config_program_address,
-                payer: authority.publicKey,
-                craftRecipe: recipe_account,
-            })
-            .rpc()
-
-        recipe.name = newName
-
-        anchorRecipe = await program.account.craftRecipe.fetch(recipe_account)
-
-        recipe.available = true
-
-        expect(anchorRecipe.recipe).to.deep.eq(recipe)
-
-        await program.methods
-            .updateCraftRecipe(recipe)
-            .accounts({
-                config: config_program_address,
-                payer: authority.publicKey,
-                craftRecipe: recipe_account,
-            })
-            .rpc()
-    })
-
-    it('Fetch all quests modify them and compare', async () => {
+    it('Fetch mock quests modify them and compare', async () => {
         const { account: config_program_address } =
             await getProgramConfigAccount(program)
 
