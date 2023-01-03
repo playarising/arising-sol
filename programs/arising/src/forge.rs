@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 
+use crate::characters::*;
+use crate::codex::*;
 use crate::config::*;
 use crate::errors::*;
-use crate::codex::*;
-use crate::characters::*;
 
 const FORGE_RECIPE_PREFIX: &str = "arising_forge_recipe";
 
@@ -13,7 +13,7 @@ pub fn forge_reward(
     character: &mut Account<Character>,
     material: u32,
     amount: u32,
-    material_type: u16
+    material_type: u16,
 ) {
     if material == 0 {
         return;

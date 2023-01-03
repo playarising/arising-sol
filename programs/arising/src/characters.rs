@@ -1,9 +1,9 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 
+use crate::codex::*;
 use crate::config::*;
 use crate::errors::*;
-use crate::codex::*;
 use crate::utils::*;
 
 const CHARACTER_PREFIX: &str = "arising_character_account";
@@ -15,7 +15,7 @@ const CHARACTER_EQUIPMENT_PREFIX: &str = "arising_character_equipment_account";
 pub fn is_mint_owner(
     mint: Pubkey,
     check_owner: Pubkey,
-    owner_token_account: &Account<TokenAccount>
+    owner_token_account: &Account<TokenAccount>,
 ) -> bool {
     if mint != owner_token_account.mint {
         msg!("is_mint_owner: token mint doesn't match");
@@ -108,7 +108,7 @@ pub fn consume_materials(
     character_materials: &mut Account<CharacterMaterials>,
     materials: &[u32; 10],
     amounts: &[u32; 10],
-    types: &[u16; 10]
+    types: &[u16; 10],
 ) {
     let mut i: usize = 0;
 
@@ -140,7 +140,7 @@ pub fn has_enough_materials(
     character_materials: &mut Account<CharacterMaterials>,
     materials: &[u32; 10],
     amounts: &[u32; 10],
-    types: &[u16; 10]
+    types: &[u16; 10],
 ) -> bool {
     let mut i: usize = 0;
     loop {
@@ -245,8 +245,7 @@ pub struct CharacterAccess<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub const CHARACTER_ACCOUNT_SIZE: usize =
-    8 + // discriminator
+pub const CHARACTER_ACCOUNT_SIZE: usize = 8 + // discriminator
     16 + // level
     32 + // mint
     BASE_STATS_SIZE + // base_stats
@@ -268,19 +267,17 @@ pub struct Character {
     pub sacrificed_points: u32,
 }
 
-pub const CHARACTER_MATERIALS_ACCOUNT_SIZE: usize =
-    8 + // discriminator
+pub const CHARACTER_MATERIALS_ACCOUNT_SIZE: usize = 8 + // discriminator
     1600 + // basic
     1600; // raw
 
 #[account]
 pub struct CharacterMaterials {
-    pub basic: [u32; 50],
-    pub raw: [u32; 50],
+    pub basic: [u32; 20],
+    pub raw: [u32; 20],
 }
 
-pub const CHARACTER_SLOT_SIZE: usize =
-    64 + // cooldown
+pub const CHARACTER_SLOT_SIZE: usize = 64 + // cooldown
     32 + // last_task_id
     1; // last_task_claimed
 
@@ -291,8 +288,7 @@ pub struct CharacterSlot {
     pub last_task_claimed: bool,
 }
 
-pub const CHARACTER_SLOTS_ACCOUNT_SIZE: usize =
-    8 + // discriminator
+pub const CHARACTER_SLOTS_ACCOUNT_SIZE: usize = 8 + // discriminator
     CHARACTER_SLOT_SIZE + // forge
     CHARACTER_SLOT_SIZE + // craft
     CHARACTER_SLOT_SIZE + // quest
@@ -307,8 +303,7 @@ pub struct CharacterSlots {
 }
 
 /// The character informationsize in bytes.
-pub const CHARACTER_EQUIPMENT_SIZE: usize =
-    32 + // helmer
+pub const CHARACTER_EQUIPMENT_SIZE: usize = 32 + // helmer
     32 + // shoulder_guards
     32 + // arm_guards
     32 + // hands

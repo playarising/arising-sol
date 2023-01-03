@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 
+use crate::characters::*;
+use crate::codex::*;
 use crate::config::*;
 use crate::errors::*;
-use crate::codex::*;
-use crate::characters::*;
 
 const QUESTS_PREFIX: &str = "arising_quest";
 
@@ -12,7 +12,7 @@ const QUESTS_PREFIX: &str = "arising_quest";
 pub fn quest_rewards(
     character: &mut Account<Character>,
     materials: &[u32; 10],
-    amounts: &[u32; 10]
+    amounts: &[u32; 10],
 ) {
     let mut i: usize = 0;
     loop {
@@ -65,7 +65,7 @@ pub struct UpdateQuest<'info> {
 pub struct AddQuest<'info> {
     #[account(mut,
         constraint = payer.key() == config.authority @ ArisingError::InvalidAuthority,
-        constraint = (config.quests + 1) == id.into() @ QuestError::InvalidID
+        constraint = (config.quests + 1) == (id as u64) @ QuestError::InvalidID
     )]
     payer: Signer<'info>,
 
@@ -91,8 +91,7 @@ pub enum QuestType {
 }
 
 /// The size of a quest.
-pub const QUEST_SIZE: usize =
-    8 + // discriminator
+pub const QUEST_SIZE: usize = 8 + // discriminator
     32 + // id
     24 + // name
     24 + // description
